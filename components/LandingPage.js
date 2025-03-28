@@ -166,7 +166,7 @@ const SeoKeywordFinder = () => {
                                             className="adsbygoogle"
                                             style={{ display: "block" }}
                                             data-ad-client="ca-pub-8393566924928419" // Replace with your actual client ID
-                                            data-ad-slot="4803905629"     // Replace with your actual ad slot ID
+                                            data-ad-slot="7861407634"     // Replace with your actual ad slot ID
                                             data-ad-format="auto"
                                             data-full-width-responsive="true"
                                         ></ins>

@@ -63,7 +63,8 @@ const SeoKeywordFinder = () => {
             }
 
 
-            const response = await fetch('http://localhost:3001/getKeywords', { // Adjust the endpoint if needed
+            // const response = await fetch('http://localhost:3001/getKeywords', { // Adjust the endpoint if needed
+            const response = await fetch('/api/getKeywords', { // Adjust the endpoint if needed
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

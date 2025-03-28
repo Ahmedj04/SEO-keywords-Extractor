@@ -96,7 +96,7 @@ const SeoKeywordFinder = () => {
             <div className="max-w-4xl mx-auto space-y-6">
                 <div className="text-center">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-                        SEO Keyword Finder
+                        SEO Keyword Miner
                     </h1>
                     <p className="text-gray-400 text-base sm:text-lg">
                         Enter a URL to extract relevant SEO keywords.

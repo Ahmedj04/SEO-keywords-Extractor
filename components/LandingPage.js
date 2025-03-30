@@ -78,10 +78,14 @@ const SeoKeywordFinder = () => {
             }
 
             const data = await response.json();
-            if (data && data.keywords && Array.isArray(data.keywords)) {
+            if(data && data.error){
+                setError('Invalid or inaccessible URL');
+            }
+            else if (data && data.keywords && Array.isArray(data.keywords)) {
                 setKeywords(data.keywords);
             }
             else {
+                console.log(data)
                 setError('No keywords found, or invalid response from the server.');
             }
 

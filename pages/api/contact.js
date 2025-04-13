@@ -46,15 +46,15 @@ const contactHandler = async (req, res) => {
             secure: true,
             service: 'gmail', // e.g., 'gmail', 'Outlook'
             auth: {
-                user: 'janahmed902@gmail.com', // Replace with your email address
-                pass: 'ubhj uuxt bdgh pbgr', // Replace with your email password or an app password
+                user: process.env.EMAIL_USER, // Replace with your email address
+                pass: process.env.EMAIL_PASS, // Replace with your email password or an app password
             },
         });
 
         // 3.2. Define the email message
         const mailOptions = {
             from: `${email}`, // Replace with your email address
-            to: `janahmed902@gmail.com`, // Replace with the recipient email address
+            to: process.env.EMAIL_USER, // Replace with the recipient email address
             subject: 'New Contact Form Submission',
             text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
             // html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`, // You can also use HTML

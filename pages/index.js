@@ -182,16 +182,6 @@ export default function Home() {
    
     return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
-        {/* Navigation Bar */}
-        {/* <nav className="flex justify-between items-center max-w-6xl mx-auto py-4 text-white">
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
-            SEO Keyword Miner
-            </h1>
-            <div className="space-x-6 text-sm sm:text-base">
-            <a href="#about" className="hover:text-purple-300 transition">About Us</a>
-            <a href="#contact" className="hover:text-purple-300 transition">Contact Us</a>
-            </div>
-        </nav> */}
 
          {/* Navigation Bar */}
         <nav className="flex items-center justify-between max-w-6xl mx-auto py-4 text-white">
@@ -234,9 +224,10 @@ export default function Home() {
                 </AnimatePresence>
             </div>
         </nav>
-
-        <section className="max-w-4xl mx-auto min-h-11/12 mt-10 h-80 flex justify-center items-center">
-            <div className='space-y-6'>
+        
+        {/* hero section */}
+        <section className="max-w-4xl mx-auto space-y-6 mt-10 min-h-[20rem]  flex justify-center items-center">
+            <div className='space-y-6 w-full'>
                 <div className="text-center">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl md:leading-16 font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
                         {/* SEO Keyword Miner */}
@@ -353,7 +344,7 @@ export default function Home() {
                 <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
                     <ListChecks className="w-8 h-8 text-green-400 mb-2" />
                     <h3 className="font-semibold text-lg text-white">Analyze</h3>
-                    <p className="text-gray-400">Click "Find Keywords" to analyze the content.</p>
+                    <p className="text-gray-400">Click "Mine Keywords" to analyze the content.</p>
                 </div>
                 </div>
                 <div className="space-y-2">

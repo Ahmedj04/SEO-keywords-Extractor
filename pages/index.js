@@ -1,4 +1,6 @@
 import React, { useState,useEffect } from 'react';
+import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp } from 'lucide-react';
+
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -97,14 +99,16 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
+      
+        <section className="max-w-4xl mx-auto space-y-6 mt-10">
             <div className="text-center">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
                     SEO Keyword Miner
                 </h1>
                 <p className="text-gray-400 text-base sm:text-lg">
-                    Enter a URL to extract relevant SEO keywords.
+                    {/* Enter a URL to extract relevant SEO keywords. */}
+                    Instantly extract high-impact SEO keywords from any webpage. Just enter a URL to start mining!
                 </p>
             </div>
 
@@ -193,7 +197,98 @@ export default function Home() {
                     </div>
                 </div>
             )}
-        </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <Rocket className="w-6 h-6 text-purple-400" /> How It Works
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                  <Search className="w-8 h-8 text-blue-400 mb-2" />
+                  <h3 className="font-semibold text-lg text-white">Enter URL</h3>
+                  <p className="text-gray-400">Paste a website URL into the input field.</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                  <ListChecks className="w-8 h-8 text-green-400 mb-2" />
+                  <h3 className="font-semibold text-lg text-white">Analyze</h3>
+                  <p className="text-gray-400">Click "Find Keywords" to analyze the content.</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                  <TrendingUp className="w-8 h-8 text-purple-400 mb-2" />
+                  <h3 className="font-semibold text-lg text-white">Get Keywords</h3>
+                  <p className="text-gray-400">View the extracted keywords.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-14">
+            <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <Lightbulb className="w-6 h-6 text-yellow-400" /> Use Cases
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                 <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                    <Users className="w-8 h-8 text-pink-400 mb-2" />
+                    <h3 className="font-semibold text-lg text-white">Competitor Analysis</h3>
+                    <p className="text-gray-400">Analyze competitors' SEO strategy.</p>
+                 </div>
+              </div>
+              <div className="space-y-2">
+                <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                  <Search className="w-8 h-8 text-orange-400 mb-2" />
+                  <h3 className="font-semibold text-lg text-white">Content Creation</h3>
+                  <p className="text-gray-400">Research keywords for content writing.</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
+                  <TrendingUp className="w-8 h-8 text-cyan-400 mb-2" />
+                  <h3 className="font-semibold text-lg text-white">Marketing Trends</h3>
+                  <p className="text-gray-400">Discover trends for digital marketing.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-14">
+            <h2 className="text-xl font-bold text-white mb-2 text-center">🔍 Try These URLs</h2>
+            <ul className="list-disc ml-5 space-y-1 text-purple-300 md:mx-auto md:w-3/12">
+              <li><code>https://www.nytimes.com</code></li>
+              <li><code>https://www.tesla.com</code></li>
+              <li><code>https://www.wikipedia.org</code></li>
+            </ul>
+          </div>
+
+          <div className='mt-14'>
+            <h2 className="text-xl font-bold text-white mb-2 text-center">❓ FAQs</h2>
+            <ul className="space-y-10 md:mx-auto md:w-6/12 text-center">
+              <li>
+                <strong>🔗 Does it work for every website?</strong><br />
+                Most public pages are supported. Some may restrict bots or have minimal readable content.
+              </li>
+              <li>
+                <strong>💸 Is this tool free?</strong><br />
+                Absolutely! Enjoy full functionality with zero cost.
+              </li>
+              <li>
+                <strong>🧠 What keywords do I get?</strong><br />
+                We extract SEO-relevant terms directly from the content you provide.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <footer className="text-center text-gray-500 text-sm mt-8">
+          &copy; {new Date().getFullYear()} SEO Keyword Miner. All rights reserved.
+        </footer>
     </div>
   );
 }

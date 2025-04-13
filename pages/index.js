@@ -181,7 +181,7 @@ export default function Home() {
 
    
     return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
+    <div id="#" className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
 
          {/* Navigation Bar */}
         <nav className="flex items-center justify-between max-w-6xl mx-auto py-4 text-white">
@@ -216,6 +216,7 @@ export default function Home() {
                                 </button>
                             </div>
                             <div className="flex flex-col space-y-6 text-sm sm:text-base">
+                                <a href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</a>
                                 <a href="#about" onClick={closeMobileMenu} className="hover:text-purple-300 transition">About Us</a>
                                 <a href="#contact" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Contact Us</a>
                             </div>

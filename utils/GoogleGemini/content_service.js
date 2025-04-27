@@ -158,7 +158,8 @@ export async function getKeywords(url) {
         }
     } catch (error) {
         console.error('Error during the process:', error);
-        return 'Error during content generation';
+        // return 'Error during content generation';
+        throw new Error('Error while extracting keywords') ; 
     }   
 }
 
@@ -178,7 +179,8 @@ export async function getCompetitors(url){
             return response; // Send raw text, and indicate it was not JSON.
         }
     } catch (error){
-        return 'Error during content generation:', error;
+        // return 'Error during content generation:', error;
+        throw new Error('Error while fetching competitors url') ; 
     }
 }
 // Given the following HTML content of a webpage:

@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu } from 'lucide-react';
+import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { extractKeywords, getMostImportantKeyword } from '@/utils/keywordUtils';
+import { getTopRankingPages, getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
+import axios from 'axios';
+import Link from 'next/link';
 
 export default function Home() {
-    const [url, setUrl] = useState('');
+    const [url, setUrl] = useState();
     const [keywords, setKeywords] = useState(null);
+    const [gaps, setGaps] = useState(null);  // New state for keyword gaps
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [adLoaded, setAdLoaded] = useState(false); // State to track ad loading
+    const [contentSuggestions, setContentSuggestions] = useState(null); // State for content suggestions
+    const [competitorUrls, setCompetitorUrls] = useState(null); // State to store competitor URLs
 
+    const [btnStatus, setBtnStatus] = useState('Mine Keywords');
 
     // Contact Form State
     const [name, setName] = useState('');
@@ -26,8 +33,7 @@ export default function Home() {
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
     };
-
-
+    
     // Function to load Google AdSense script
     const loadAdSenseScript = () => {
         if (typeof window === 'undefined' || document.querySelector('#adsense-script')) {
@@ -58,49 +64,86 @@ export default function Home() {
 
         setLoading(true);
         setError(null);
-        setKeywords(null); // Clear previous results
+        setKeywords(null);
+        setGaps(null); // Clear previous results
+        setCompetitorUrls(null)
+        setContentSuggestions(null);
+        setBtnStatus('Analyzing...')
 
         try {
-            // Basic URL validation
-            try {
-                new URL(url);
-            } catch (_) {
-                setError('Invalid URL. Please enter a valid URL, including the protocol (http:// or https://).');
-                setLoading(false);
-                return;
+            //  Basic URL validation
+            //  try {
+            //     new URL(url);
+
+            // } catch (_) {
+            //     setError('Invalid URL. Please enter a valid URL, including the protocol (http:// or https://).');
+            //     setLoading(false);
+            //     return;
+            // }
+            let formattedUrl = url.trim();
+
+            // Add https:// if missing
+            if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                formattedUrl = 'https://' + formattedUrl;
             }
 
+            const metadataResponse = await axios.get(`/api/getPageMetadata?url=${encodeURIComponent(formattedUrl)}`);
 
-            // const response = await fetch('http://localhost:3001/getKeywords', { // Adjust the endpoint if needed
-            const response = await fetch('/api/getKeywords', { // Adjust the endpoint if needed
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url }),
-            });
+            if (metadataResponse.status !== 200) return;
+            
+            setBtnStatus('Extracting Keywords...')
+            // Fetch keywords from the current page
+            const currentPageKeywords = await extractKeywords(formattedUrl);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to fetch keywords.');
-            }
+            // Determine a relevant keyword for the search.  For simplicity, we'll use the first keyword
+            // from the current page.  In a real application, you might use a more sophisticated approach
+            // to select the most important keyword(s).
+            const keywordForSearch = currentPageKeywords[0] || "general search"; // Use first keyword or a default
+            // const keywordForSearch = await getMostImportantKeyword(currentPageKeywords, url, metadataResponse);
+            
+            setBtnStatus('Analyzing Competitors...')
+            // const topPageUrls = await getTopRankingPages(keywordForSearch);
+            const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
-            const data = await response.json();
-            if(data && data.error){
-                setError('Invalid or inaccessible URL');
-            }
-            else if (data && data.keywords && Array.isArray(data.keywords)) {
-                setKeywords(data.keywords);
+            // Extract keywords from the top 3 pages
+            // const topPageKeywords = await extractKeywords(topPageUrls[0]);
+            const topPageKeywords = await Promise.all(
+                topPageUrls.map(async (pageUrl) => {
+                    const pageMetadataResponse = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
+                    if (pageMetadataResponse.status === 200) {
+                        return await extractKeywords(pageUrl);
+                    }
+                    return []; // Return empty array for invalid URLs
+                })
+            );
+           
+
+            // Combine all keywords from top pages into a single array
+            const allTopKeywords = topPageKeywords.flat();
+
+            // Calculate keyword gaps (keywords present in top pages but not in current page)
+            const calculatedGaps = allTopKeywords.filter(
+                keyword => !currentPageKeywords.includes(keyword)
+            );
+
+            setBtnStatus("Generating Suggestions...");
+            const suggestions = await generateContentSuggestions(metadataResponse.data, calculatedGaps);
+
+            setKeywords(currentPageKeywords);
+            setGaps(calculatedGaps);
+            setCompetitorUrls(topPageUrls);
+            setContentSuggestions(suggestions);
+ 
+        } catch (error) {
+            if(error.response.data.error){
+                setError(error.response.data.error);
             }
             else {
-                console.log(data)
-                setError('No keywords found, or invalid response from the server.');
+                setError(error.message)
             }
-
-        } catch (error) {
-            setError(error.message);
         } finally {
             setLoading(false);
+            setBtnStatus('Mine Keywords')
         }
     };
 
@@ -151,8 +194,8 @@ export default function Home() {
         };
     }, []);
 
-     // Close menu when clicking outside
-    useEffect(() => {
+     // Close menu when clicking outside 
+     useEffect(() => {
         const handleClickOutside = (event) => {
             if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
                 setIsMobileMenuOpen(false);
@@ -177,20 +220,62 @@ export default function Home() {
             return () => clearTimeout(timer); // Clear timeout if component unmounts or status changes
         }
     }, [submissionStatus]);
-    
-
    
     return (
     <div id="#" className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
+        {/* fixed header    */}
+        {/* <nav className="fixed top-0 left-0 w-full py-4 px-4 sm:px-8 text-white z-50 bg-gray-900/90 backdrop-blur-md">
+            <div className="max-w-6xl mx-auto w-full flex items-center justify-between pt-4 sm:pt-8 ">
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+                    SEO Keyword Miner
+                </h1>
+                <div className="hidden sm:flex space-x-6 text-sm sm:text-base">
+                    <a href="#about" className="hover:text-purple-300 transition">About Us</a>
+                    <a href="#contact" className="hover:text-purple-300 transition">Contact Us</a>
+                </div>
+                <div className="sm:hidden">
+                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
+                        <Menu className="h-6 w-6" />
+                    </button>
+                    <AnimatePresence>
+                        {isMobileMenuOpen && (
+                            <motion.div
+                                ref={mobileMenuRef}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.2 }}
+                                className="fixed top-0 right-0 h-screen w-64 bg-gray-900/90 backdrop-blur-md border-l border-purple-500/20 shadow-2xl z-50 p-6 space-y-8"
+                            >
+                                <div className="flex justify-end">
+                                    <button onClick={closeMobileMenu} className="text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="flex flex-col space-y-6 text-sm sm:text-base">
+                                    <a href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</a>
+                                    <a href="#about" onClick={closeMobileMenu} className="hover:text-purple-300 transition">About Us</a>
+                                    <a href="#contact" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Contact Us</a>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+        </nav> */}
 
          {/* Navigation Bar */}
         <nav className="flex items-center justify-between max-w-6xl mx-auto py-4 text-white">
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
-                SEO Keyword Miner
-            </h1>
+            <Link href='/'>
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+                    SEO Keyword Miner
+                </h1>
+            </Link>
             <div className="hidden sm:flex space-x-6 text-sm sm:text-base">
-                <a href="#about" className="hover:text-purple-300 transition">About Us</a>
-                <a href="#contact" className="hover:text-purple-300 transition">Contact Us</a>
+                <Link href="#about" className="hover:text-purple-300 transition">About Us</Link>
+                <Link href="#contact" className="hover:text-purple-300 transition">Contact Us</Link>
             </div>
             <div className="sm:hidden">
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
@@ -209,16 +294,15 @@ export default function Home() {
                         >
                             <div className="flex justify-end">
                                 <button onClick={closeMobileMenu} className="text-white">
-                                    {/* */}
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
                             <div className="flex flex-col space-y-6 text-sm sm:text-base">
-                                <a href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</a>
-                                <a href="#about" onClick={closeMobileMenu} className="hover:text-purple-300 transition">About Us</a>
-                                <a href="#contact" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Contact Us</a>
+                                <Link href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</Link>
+                                <Link href="#about" onClick={closeMobileMenu} className="hover:text-purple-300 transition">About Us</Link>
+                                <Link href="#contact" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Contact Us</Link>
                             </div>
                         </motion.div>
                     )}
@@ -243,7 +327,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4">
                     <input
                         type="text"
-                        placeholder="Enter URL (e.g., https://www.example.com)"
+                        placeholder="Enter website Url (e.g., example.com)"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         className="flex-1 bg-black/20 text-white border-purple-500/30 placeholder:text-gray-500 rounded-md py-3 px-4"
@@ -256,10 +340,18 @@ export default function Home() {
                     <button
                         onClick={handleGetKeywords}
                         disabled={loading}
-                        className="bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600
+                        className="bg-gradient-to-r flex items-center justify-center from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600
                         disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-md"
                     >
-                        {loading ? 'Loading...' : 'Mine Keywords'}
+                        {loading ? (
+                            <>
+                                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                                {btnStatus}
+                            </>
+                        ) : (
+                            btnStatus
+                        )}
+                        
                     </button>
                 </div>
 
@@ -288,13 +380,13 @@ export default function Home() {
                     </div>
                 )}
 
-                {keywords && (
+                {(keywords || gaps || contentSuggestions) && (
                     <div className="opacity-0 animate-fadeIn delay-300">
                         <div className="bg-black/20 border-purple-500/30 rounded-md">
                             <div className="p-6">
                                 <h2 className="text-white text-2xl font-semibold mb-2">SEO Keywords</h2>
                                 <p className="text-gray-400 mb-4">
-                                    Top {keywords.length} keywords extracted from the URL.
+                                    Top {keywords?.length} keywords extracted from the URL.
                                 </p>
                                 {/* Google AdSense Ad Unit */}
                                 {adLoaded && (
@@ -303,24 +395,89 @@ export default function Home() {
                                             className="adsbygoogle"
                                             style={{ display: "block" }}
                                             data-ad-client="ca-pub-8393566924928419" // Replace with your actual client ID
-                                            data-ad-slot="7861407634"     // Replace with your actual ad slot ID
+                                            data-ad-slot="7861407634"  // Replace with your actual ad slot ID
                                             data-ad-format="auto"
                                             data-full-width-responsive="true"
                                         ></ins>
                                     </div>
                                 )}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {keywords.length > 0 ? (
-                                        keywords.map((keyword, index) => (
-                                            <div key={index} className="text-gray-300">
-                                                <span className="mr-2">•</span>
-                                                {keyword}
+                                    {keywords && keywords.length > 0 ? (
+                                        <div className="space-y-4">
+                                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                                <ListChecks className="w-5 h-5 text-green-400" />
+                                                Extracted Keywords
+                                            </h3>
+                                            <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-500/20 rounded-lg shadow-md p-4">
+                                                {keywords.map((keyword, index) => (
+                                                    <div key={index} className="text-gray-300 py-2 border-b border-purple-500/20 last:border-none flex items-center gap-2">
+                                                        <ChevronRight className="w-4 h-4 text-purple-400" />
+                                                        <span className="font-medium">{keyword}</span>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))
+                                        </div>
                                     ) : (
                                         <div className="text-gray-400">No keywords found.</div>
                                     )}
+                                    {gaps && gaps.length > 0 && (
+                                          <div className="space-y-2">
+                                            {/* <h3 className="text-lg font-semibold text-red-400">Top {gaps.length>30?30:gaps.length} Keyword Gaps (Top Ranking Pages)</h3> */}
+                                            <h3 className="text-lg font-semibold text-red-400 flex items-center gap-2">
+                                                <TrendingUp className="w-5 h-5" />
+                                                Keyword Gaps (Top Ranking Pages)
+                                            </h3>
+                                            <div className="bg-black/50 rounded-md p-4 space-y-2">
+                                                {gaps.slice(0, 30).map((gap, index) => (  // Limit to 30
+                                                    <div key={index} className="text-red-300 py-1 border-b border-purple-500/20 last:border-none flex items-center gap-1.5">
+                                                        <ChevronRight className="w-4 h-4 text-red-400" />
+                                                        {gap}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {competitorUrls && competitorUrls.length > 0 && (
+                                                <div className="bg-black/50 border-purple-500/20 p-4 rounded-md">
+                                                    <h3  className="text-base font-semibold text-blue-400 flex items-center gap-2">
+                                                        <Users className="w-5 h-5" />
+                                                        Competitor URLs
+                                                    </h3>
+                                                    <p className="text-gray-300 my-3 text-sm">
+                                                        Top {competitorUrls.length} competing websites
+                                                    </p>
+
+                                                        <ul className="space-y-2">
+                                                            {competitorUrls.map((competitorUrl, index) => (
+                                                                <li key={index} className="text-blue-300 hover:text-blue-200 transition-colors text-xs">
+                                                                    <a href={competitorUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                                                                        <ChevronRight className="w-4 h-4" />
+                                                                        {competitorUrl}
+                                                                    </a>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
+                                
+                                {contentSuggestions ? (
+                                    <div className="mt-8 space-y-4">
+                                            <div className="bg-black/50 border-purple-500/20 rounded-md">
+                                            {/* <div className="bg-black/20 border-purple-500/30 rounded-md"> */}
+                                                <div className="p-4">
+                                                    <h3 className="text-white text-lg flex items-center gap-2">
+                                                        <Lightbulb className="w-5 h-5 text-yellow-400" />
+                                                        Content Optimization Suggestion
+                                                    </h3>
+                                                </div>
+                                                <div className="p-4">
+                                                    <p className="text-gray-300">{contentSuggestions.text}</p>
+                                                </div>
+                                            </div>
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -328,6 +485,7 @@ export default function Home() {
             </div>
         </section>
 
+        {/* content section */}
         <section className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28">
             <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
@@ -414,19 +572,19 @@ export default function Home() {
                 </ul>
             </div> */}
 
-            <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white text-center">🔍 Try These URLs</h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              {['https://www.nytimes.com', 'https://www.tesla.com', 'https://www.wikipedia.org'].map((url, index) => (
-                <span
-                  key={index}
-                  className="bg-purple-700/20 text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-full px-6 py-3 transition-colors shadow-md hover:shadow-lg"
-                >
-                  {url}
-                </span>
-              ))}
-            </div>
-          </div>
+            {/* <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-white text-center">🔍 Try These URLs</h2>
+                <div className="flex flex-wrap justify-center gap-4">
+                {['https://www.nytimes.com', 'https://www.tesla.com', 'https://www.wikipedia.org'].map((url, index) => (
+                    <span
+                    key={index}
+                    className="bg-purple-700/20 text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-full px-6 py-3 transition-colors shadow-md hover:shadow-lg"
+                    >
+                    {url}
+                    </span>
+                ))}
+                </div>
+            </div> */}
 
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white text-center">❓ FAQs</h2>

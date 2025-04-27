@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
     "express-validator": "^7.2.1",
     "framer-motion": "^12.6.5",
     "lucide-react": "^0.487.0",
@@ -17,6 +19,7 @@
     "nodemailer": "^6.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "serpapi": "^2.1.0",
     "typescript": "^5.8.2"
   },
   "devDependencies": {

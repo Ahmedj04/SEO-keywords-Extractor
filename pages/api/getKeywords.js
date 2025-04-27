@@ -1,6 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
-import { getKeywords } from "@/services/GoogleGemini/content_service";
+import { getKeywords } from "@/utils/GoogleGemini/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {

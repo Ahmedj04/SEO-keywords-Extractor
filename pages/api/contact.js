@@ -55,7 +55,7 @@ const contactHandler = async (req, res) => {
         const mailOptions = {
             from: `${email}`, // Replace with your email address
             to: process.env.EMAIL_USER, // Replace with the recipient email address
-            subject: 'New Contact Form Submission',
+            subject: 'New Contact Form Submission On SEO keyword Miner.',
             text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
             // html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`, // You can also use HTML
         };

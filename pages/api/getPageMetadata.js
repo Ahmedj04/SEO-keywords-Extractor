@@ -37,7 +37,7 @@ export default async function handler(req, res) {
         // console.error('Error fetching or parsing the page:', error);
         // res.status(500).json({ error: `Failed to fetch metadata: ${error.message}` });
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')){
-            res.status(500).json({ error: `Request timed out. The website took too long to respond. Please try again later.` });
+            res.status(500).json({ error: `Request timed out. Please try again later.` });
         }
         else{
             // res.status(500).json({ error: `Failed to fetch metadata: ${error.message}` });

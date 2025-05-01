@@ -8,11 +8,7 @@ export const extractKeywords = async (url) => {
     });
 
     const data = await response.json();
-
-    // if (data.error) {
-    //     throw new Error(data.error); // {"error": "Invalid or inaccessible URL"}
-    // }
-    return data.keywords;
+    return data;
 };
 
 export function getMostImportantKeyword(keywords, url, metadataResponse) {

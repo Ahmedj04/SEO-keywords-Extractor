@@ -59,7 +59,36 @@ import { geminiCall } from './geminiService';
 //     {"error": "Invalid or inaccessible URL"}
 //     \`\`\` `;
 
-const getKeySystemInstruction = `You are a highly skilled SEO analyst AI. Your task is to process the provided webpage text and extract its most important SEO keywords.
+// ===================
+
+// const getKeySystemInstruction = `You are a highly skilled SEO analyst AI. Your task is to process the provided webpage text and extract its most important SEO keywords.
+
+// Follow these steps precisely:
+
+// 1. **Keyword Extraction:**
+//    - Analyze the provided textual content thoroughly.
+//    - Identify 15 to 20 of the most relevant keywords for Search Engine Optimization (SEO).
+//    - Focus on keywords that strongly align with the core topic and inferred user search intent.
+//    - Prioritize single-word (short-tail) or short-phrase (mid-tail, 1-3 words) keywords. Include long-tail keywords (4+ words) only if they are highly prominent and relevant.
+//    - Exclude overly broad or generic keywords unless they are critical to the content’s focus.
+//    - Filter out stop words (e.g., "the", "a", "is", "and") and non-descriptive terms (e.g., "click here", "learn more") unless integral to a keyphrase.
+//    - Consider keyword prominence (e.g., frequency, placement in headings, or emphasis) to determine importance.
+
+// 2. **Output Formatting:**
+//    - Return the keywords as a JSON array of strings.
+//    - Output *only* the raw JSON array, with no additional text, explanations, or formatting (e.g., no "Here are the keywords:", no bullet points).
+//    - Ensure the JSON is valid, well-formed, and parsable.
+//    - List keywords in lowercase for consistency, unless capitalization is critical (e.g., proper nouns).
+
+// **Example Output:**
+// \`\`\`json
+// ["seo", "keywords", "ranking", "search intent"]
+// \`\`\``;
+
+
+// ========= Adding top keyword as well ============
+ 
+const getKeySystemInstruction = `You are a highly skilled SEO analyst AI. Your task is to process the provided webpage text and extract its most important SEO keywords, and determine the single most relevant keyword for search optimization.
 
 Follow these steps precisely:
 
@@ -72,16 +101,29 @@ Follow these steps precisely:
    - Filter out stop words (e.g., "the", "a", "is", "and") and non-descriptive terms (e.g., "click here", "learn more") unless integral to a keyphrase.
    - Consider keyword prominence (e.g., frequency, placement in headings, or emphasis) to determine importance.
 
-2. **Output Formatting:**
-   - Return the keywords as a JSON array of strings.
-   - Output *only* the raw JSON array, with no additional text, explanations, or formatting (e.g., no "Here are the keywords:", no bullet points).
-   - Ensure the JSON is valid, well-formed, and parsable.
-   - List keywords in lowercase for consistency, unless capitalization is critical (e.g., proper nouns).
+2. **Top Keyword Selection:**
+   - After extracting the full list of keywords, identify the single most relevant keyword based on:
+     - Prominence in the content (e.g., frequency, location in headings or titles).
+     - Relevance to the page's main topic and user intent.
+     - Specificity and SEO value.
+   - The top keyword should ideally represent the core focus of the content.
 
-**Example Output:**
-\`\`\`json
-["seo", "keywords", "ranking", "search intent"]
-\`\`\``;
+3. **Output Formatting:**
+   - Return a valid JSON object with the following structure:
+     \`\`\`json
+     {
+       "keywords": ["keyword1", "keyword2", ..., "keywordN"],
+       "topKeyword": "best-single-keyword"
+     }
+     \`\`\`
+   - Do not include any extra explanation, text, or formatting.
+   - All keywords must be in lowercase unless proper nouns require capitalization.
+   - Ensure the JSON is clean, valid, and parsable.
+`;
+
+
+
+
 
 // Initialize the Generative AI model
 // const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" ,systemInstruction: systemPrompt});
@@ -136,15 +178,32 @@ export async function getKeywords(url) {
             .text();
         const cleanText = text.replace(/\s+/g, ' ').trim(); // Replace multiple spaces with single space
 
-        const prompt = `Extract the top 15 to 20 keywords related to SEO from the following text content of a webpage: 
+        // const prompt = `Extract the top 15 to 20 keywords related to SEO from the following text content of a webpage: 
         
-        ${cleanText}
+        // ${cleanText}
 
-        I need a concise list of keywords that an SEO expert would consider most important for understanding this page's search relevance. 
-        Do not include any extra text before or after the list.
-        `;
+        // I need a concise list of keywords that an SEO expert would consider most important for understanding this page's search relevance. 
+        // Do not include any extra text before or after the list.
+        // `;
 
         // 4. Get keywords from the model
+        
+        const prompt = `Extract the top 15 to 20 SEO-relevant keywords from the following webpage text content:
+
+            ${cleanText}
+
+            Provide a valid JSON object with the following structure:
+            {
+            "keywords": ["keyword1", "keyword2", ..., "keywordN"],
+            "topKeyword": "best-single-keyword"
+            }
+
+            - Focus on short-tail and mid-tail keywords (1–3 words), and include long-tail only if highly relevant.
+            - Avoid generic words and stop words unless necessary.
+            - The "topKeyword" should represent the most relevant and important term based on frequency, placement, and user intent.
+            - Output only the raw JSON object, no extra text or explanation.
+            `;
+                    
         const responseText = await geminiCall({ modelName: "gemini-2.0-flash", prompt , systemInstruction: getKeySystemInstruction});
 
         // 5. Process the response (same as before, but handle potential errors)

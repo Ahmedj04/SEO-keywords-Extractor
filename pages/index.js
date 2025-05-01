@@ -94,53 +94,39 @@ export default function Home() {
             setBtnStatus('Extracting Keywords...')
             // Fetch keywords from the current page
             const currentPageKeywords = await extractKeywords(formattedUrl);
-
-            // Determine a relevant keyword for the search.  For simplicity, we'll use the first keyword
-            // from the current page.  In a real application, you might use a more sophisticated approach
-            // to select the most important keyword(s).
-            const keywordForSearch = currentPageKeywords[0] || "general search"; // Use first keyword or a default
-            // const keywordForSearch = await getMostImportantKeyword(currentPageKeywords, url, metadataResponse);
             
             setBtnStatus('Analyzing Competitors...')
             // const topPageUrls = await getTopRankingPages(keywordForSearch);
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
             // Extract keywords from the top 3 pages
-            // const topPageKeywords = await extractKeywords(topPageUrls[0]);
             const topPageKeywords = await Promise.all(
-                topPageUrls.map(async (pageUrl) => {
-                    const pageMetadataResponse = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
-                    if (pageMetadataResponse.status === 200) {
-                        return await extractKeywords(pageUrl);
-                    }
-                    return []; // Return empty array for invalid URLs
+                topPageUrls.map(async (url) => {
+                  const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(url)}`);
+                  return res.status === 200 ? await extractKeywords(url) : [] ;
                 })
-            );
+              );
            
-
             // Combine all keywords from top pages into a single array
-            const allTopKeywords = topPageKeywords.flat();
+            // const allTopKeywords = topPageKeywords.flat();
+            const allTopKeywords = topPageKeywords.flatMap(item => item.keywords.map(keyword => keyword.toLowerCase()));
+
 
             // Calculate keyword gaps (keywords present in top pages but not in current page)
             const calculatedGaps = allTopKeywords.filter(
-                keyword => !currentPageKeywords.includes(keyword)
+                keyword => !currentPageKeywords.keywords.includes(keyword)
             );
 
             setBtnStatus("Generating Suggestions...");
             const suggestions = await generateContentSuggestions(metadataResponse.data, calculatedGaps);
 
-            setKeywords(currentPageKeywords);
+            setKeywords(currentPageKeywords.keywords);
             setGaps(calculatedGaps);
             setCompetitorUrls(topPageUrls);
             setContentSuggestions(suggestions);
  
         } catch (error) {
-            if(error.response.data.error){
-                setError(error.response.data.error);
-            }
-            else {
-                setError(error.message)
-            }
+            setError(error.message)
         } finally {
             setLoading(false);
             setBtnStatus('Mine Keywords')

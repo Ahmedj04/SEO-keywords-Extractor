@@ -94,24 +94,28 @@ export default function Home() {
             setBtnStatus('Extracting Keywords...')
             // Fetch keywords from the current page
             const currentPageKeywords = await extractKeywords(formattedUrl);
-            
             setBtnStatus('Analyzing Competitors...')
             // const topPageUrls = await getTopRankingPages(keywordForSearch);
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
             // Extract keywords from the top 3 pages
             const topPageKeywords = await Promise.all(
-                topPageUrls.map(async (url) => {
-                  const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(url)}`);
-                  return res.status === 200 ? await extractKeywords(url) : [] ;
+                topPageUrls.map(async (pageUrl) => {
+                    const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
+                    if (res.status === 200) {
+                        return await extractKeywords(pageUrl);
+                    }
+                    return null; // Return empty array for invalid URLs
+                    // return {keywords:[],topKeyword:""};
                 })
-              );
-           
+            );
+
             // Combine all keywords from top pages into a single array
             // const allTopKeywords = topPageKeywords.flat();
-            const allTopKeywords = topPageKeywords.flatMap(item => item.keywords.map(keyword => keyword.toLowerCase()));
-
-
+            const allTopKeywords = topPageKeywords
+            .filter(item => item !== null) // remove null entries
+            .flatMap(item => item.keywords.map(keyword => keyword.toLowerCase()));
+          
             // Calculate keyword gaps (keywords present in top pages but not in current page)
             const calculatedGaps = allTopKeywords.filter(
                 keyword => !currentPageKeywords.keywords.includes(keyword)
@@ -126,7 +130,17 @@ export default function Home() {
             setContentSuggestions(suggestions);
  
         } catch (error) {
-            setError(error.message)
+            if (error.response.data.error) {
+                setError(error.response.data.error);
+            }
+            else if(error.response.data.errorDetail.code=="ECONNREFUSED"){
+                setError("Oops! We couldn't connect right now. Please try again in a few moments.")
+            } 
+             else {
+                // setError(error.message)
+                setError("An error occurred while fetching data. Please try again later.")
+            }
+            
         } finally {
             setLoading(false);
             setBtnStatus('Mine Keywords')

@@ -216,9 +216,9 @@ export async function getKeywords(url) {
             return responseText; // Send raw text, and indicate it was not JSON.
         }
     } catch (error) {
-        console.error('Error during the process:', error);
+        console.error('Error while extracting keywords', error);
         // return 'Error during content generation';
-        throw new Error('Error while extracting keywords') ; 
+        throw new Error('Error while extracting keywords' , { cause: error }) ; 
     }   
 }
 

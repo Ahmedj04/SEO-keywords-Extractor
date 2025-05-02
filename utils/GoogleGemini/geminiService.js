@@ -9,7 +9,8 @@ export async function geminiCall({modelName, prompt, systemInstruction}){
         return result.response.candidates[0].content.parts[0].text;
     } catch (error) {
         console.error("Error calling Gemini API:", error);
-        return error; // Handle error within the function and return null
+        // return error; // Handle error within the function and return null
+        throw new Error(error); // Handle error within the function and return null
     }
     
 }

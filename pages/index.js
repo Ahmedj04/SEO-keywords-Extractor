@@ -94,19 +94,29 @@ export default function Home() {
             setBtnStatus('Extracting Keywords...')
             // Fetch keywords from the current page
             const currentPageKeywords = await extractKeywords(formattedUrl);
+            
             setBtnStatus('Analyzing Competitors...')
+
             // const topPageUrls = await getTopRankingPages(keywordForSearch);
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
+            setBtnStatus('Extracting Keywords...')
             // Extract keywords from the top 3 pages
             const topPageKeywords = await Promise.all(
                 topPageUrls.map(async (pageUrl) => {
                     const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
                     if (res.status === 200) {
-                        return await extractKeywords(pageUrl);
+                        const competitorKeywords =  await extractKeywords(pageUrl);
+                        if (competitorKeywords.keywords){
+                            return competitorKeywords
+                        }
+                        else{
+                            return { keywords:[], topKeyword:"" }
+                        }
+                        // return await extractKeywords(pageUrl);
                     }
-                    return null; // Return empty array for invalid URLs
-                    // return {keywords:[],topKeyword:""};
+                    // return null; // Return empty array for invalid URLs
+                    return { keywords:[], topKeyword:"" };
                 })
             );
 

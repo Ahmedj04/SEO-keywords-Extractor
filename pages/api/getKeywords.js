@@ -8,12 +8,7 @@ export default async function handler(req, res) {
         }
         try {
             const result = await getKeywords(url);
-            // const {keywords, topkeyword} = await getKeywords(url);/
-            // if (result && result.error) {
-            //     return res.status(200).json(result); // Send error response
-            // }
             // res.status(200).json({ keywords: result }); // Send keywords response
-            // res.status(200).json({ keywords, topkeyword }); // Send keywords response
             res.status(200).json(result); // Send keywords response
         } catch (error) {
             console.log("Error coming from content_service getKeyword function: ",error)

@@ -140,14 +140,18 @@ export default function Home() {
             setContentSuggestions(suggestions);
  
         } catch (error) {
-            if( error.response.data.errorDetail.code == "ECONNREFUSED" ){
-                setError("Oops! We couldn't connect right now. Please try again in a few moments.")
-            }
-            else if (error.response.data.error) {
+            // if( error.response.data.errorDetail.code == "ECONNREFUSED" ){
+            //     setError("Oops! We couldn't connect right now. Please try again in a few moments.")
+            // }
+            // else
+             if (error.response.data.error) {
                 setError(error.response.data.error);
             }    
-            else {
-                // setError(error.message)
+            else if(error.message){
+                setError(error.message)
+               
+            }
+            else{
                 setError("An error occurred while fetching data. Please try again later.")
             }
             

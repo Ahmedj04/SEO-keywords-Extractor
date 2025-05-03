@@ -7,7 +7,7 @@ import axios from 'axios';
 import Link from 'next/link';
 
 export default function Home() {
-    const [url, setUrl] = useState();
+    const [url, setUrl] = useState("");
     const [keywords, setKeywords] = useState(null);
     const [gaps, setGaps] = useState(null);  // New state for keyword gaps
     const [loading, setLoading] = useState(false);

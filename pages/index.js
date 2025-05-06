@@ -97,7 +97,6 @@ export default function Home() {
             
             setBtnStatus('Analyzing Competitors...')
 
-            // const topPageUrls = await getTopRankingPages(keywordForSearch);
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
             setBtnStatus('Extracting Keywords...')
@@ -191,6 +190,7 @@ export default function Home() {
         }
     };
 
+    // to load adsense script 
     useEffect(() => {
         loadAdSenseScript(); // Load AdSense script on component mount
 

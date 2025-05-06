@@ -239,7 +239,7 @@ export async function getCompetitors(url){
         }
     } catch (error){
         // return 'Error during content generation:', error;
-        throw new Error('Error while fetching competitors url') ; 
+        throw new Error('Error while fetching competitors url', { cause: error }) ; 
     }
 }
 // Given the following HTML content of a webpage:
@@ -327,6 +327,6 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
         }
     } catch (error) {
         // console.error("Error generating content suggestions:", error);
-        throw new Error('Error during content generation') ; 
+        throw new Error('Error during content generation', { cause: error }) ; 
     }
 };

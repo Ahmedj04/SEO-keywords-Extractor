@@ -140,10 +140,6 @@ export default function Home() {
             setContentSuggestions(suggestions);
  
         } catch (error) {
-            // if( error.response.data.errorDetail.code == "ECONNREFUSED" ){
-            //     setError("Oops! We couldn't connect right now. Please try again in a few moments.")
-            // }
-            // else
              if (error.response.data.error) {
                 setError(error.response.data.error);
             }    

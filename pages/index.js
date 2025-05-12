@@ -281,6 +281,20 @@ export default function Home() {
                         </div>
                     )}
 
+                    {/* Google AdSense Ad Unit */}
+                    {adLoaded && (
+                        <div className="my-4">
+                            <ins
+                                className="adsbygoogle"
+                                style={{ display: "block" }}
+                                data-ad-client="ca-pub-8393566924928419" // Replace with your actual client ID
+                                data-ad-slot="7861407634"  // Replace with your actual ad slot ID
+                                data-ad-format="auto"
+                                data-full-width-responsive="true"
+                            ></ins>
+                        </div>
+                    )}
+
                     {(keywords || gaps || contentSuggestions) && (
                         <div className="opacity-0 animate-fadeIn delay-300">
                             <div className="bg-black/20 border-purple-500/30 rounded-md">
@@ -289,19 +303,7 @@ export default function Home() {
                                     <p className="text-gray-400 mb-4">
                                         Top {keywords?.length} keywords extracted from the URL.
                                     </p>
-                                    {/* Google AdSense Ad Unit */}
-                                    {adLoaded && (
-                                        <div className="my-4">
-                                            <ins
-                                                className="adsbygoogle"
-                                                style={{ display: "block" }}
-                                                data-ad-client="ca-pub-8393566924928419" // Replace with your actual client ID
-                                                data-ad-slot="7861407634"  // Replace with your actual ad slot ID
-                                                data-ad-format="auto"
-                                                data-full-width-responsive="true"
-                                            ></ins>
-                                        </div>
-                                    )}
+                                    
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {keywords && keywords.length > 0 ? (
                                             <div className="space-y-4">

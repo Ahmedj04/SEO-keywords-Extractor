@@ -330,48 +330,6 @@ export async function getCompetitors(url){
 // Given the following HTML content of a webpage:
 //  Use LLM to generate content optimization suggestions
 export const generateContentSuggestions = async (metadata, gapKeywords) => {
-    // Placeholder: Replace this with your actual LLM API call (e.g., Gemini)
-    // 1.  Prepare the prompt, incorporating the HTML and gap keywords
-    // const prompt = `
-        
-    //     Given the following MetaData of a webpage:
-        
-    //     ${metadata}
-        
-    //     And the following list of keywords that are missing from this page but present in top-ranking pages (keyword gaps):
-        
-    //     ${gapKeywords.join(', ')}
-        
-    //     Generate a list of content optimization suggestions to incorporate these missing keywords into the content. 
-        
-    //     Provide each suggestion as a JSON object with the following properties:
-    //     - type: (e.g., "heading", "paragraph", "general")
-    //     - keyword: (the missing keyword)
-    //     - text: (a detailed suggestion on how to incorporate the keyword, including specific examples and context)
-    //     - priority: (1 for high, 2 for medium, 3 for low)
-        
-    //     Example output:
-    //     [
-    //         {
-    //             "type": "heading",
-    //             "keyword": "Intelligent Automation",
-    //             "text": "Add a new H2 or H3 heading titled 'The Rise of Intelligent Automation' to discuss how AI-powered automation is transforming business processes.",
-    //             "priority": 1
-    //         },
-    //         {
-    //             "type": "paragraph",
-    //             "keyword": "process mining",
-    //             "text": "Incorporate 'process mining' into the section discussing process analysis. Explain how process mining tools can help identify automation opportunities.",
-    //             "priority": 2
-    //         },
-    //          {
-    //             "type": "general",
-    //             "keyword": "RPA",
-    //             "text": "Expand the content to include a section on Robotic Process Automation (RPA) and its role in intelligent automation.",
-    //             "priority": 1
-    //         }
-    //     ]
-    // `;
     const prompt = `
         Given the MetaData content of a webpage:
 
@@ -415,3 +373,31 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
         throw new Error('Error during content generation', { cause: error }) ; 
     }
 };
+
+export const generateArticleContent = async (title, keywords) => {
+    const prompt = `
+        You are an expert SEO content writer. Your task is to generate high-quality, SEO-optimized, and readable content for a webpage.
+
+        **Content Topic/Title:** ${title}
+
+        **Key SEO Keywords to Incorporate (naturally and contextually):** ${keywords}
+
+        **Instructions:**
+        1.  Write a compelling and informative article of approximately 400-500 words.
+        2.  Structure the content with an introduction, main body paragraphs, and a brief conclusion.
+        3.  Integrate the provided keywords naturally throughout the text. Do NOT force keywords.
+        4.  Ensure the content is engaging, provides value to the reader, and demonstrates expertise on the topic.
+        5.  Use clear, concise language.
+        6.  Do NOT include any introductory or concluding remarks outside the article content itself.
+        7.  Do NOT include any markdown headers (like ##) unless explicitly for the article's internal structure.
+        8.  Return ONLY the generated article text.
+    `;
+
+    try {
+        const response = await geminiCall({ modelName: "gemini-2.0-flash", prompt });
+        return response; // Return the generated content
+    } catch (error) {
+        console.error('Error generating article content:', error);
+        throw new Error('Error during content generation', { cause: error }) ; 
+    }
+}

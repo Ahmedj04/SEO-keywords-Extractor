@@ -75,7 +75,7 @@ export default function Header() {
                     </div>
                 </div>
             </nav> */}
-            
+
             <nav className="flex items-center justify-between max-w-6xl mx-auto py-4 text-white">
                 <Link href='/'>
                     <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
@@ -83,6 +83,17 @@ export default function Header() {
                     </h1>
                 </Link>
                 <div className="hidden sm:flex space-x-6 text-sm sm:text-base">
+                    <Link href="/aiwriter" className="relative flex items-center gap-2 hover:text-purple-300 transition font-semibold">
+                        <span>AI Writer</span>
+                        <motion.span
+                            initial={{ opacity: 0.6, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                            className=" bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full shadow-md"
+                        >
+                            New ✨
+                        </motion.span>
+                    </Link>
                     <Link href="/#how-it-works" className="hover:text-purple-300 transition">How it Works</Link>
                     <Link href="/#features" className="hover:text-purple-300 transition">Features</Link>
                     <Link href="/#about" className="hover:text-purple-300 transition">About Us</Link>
@@ -114,6 +125,17 @@ export default function Header() {
                                 </div>
                                 <div className="flex flex-col space-y-6 text-sm sm:text-base">
                                     <Link href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</Link>
+                                    <Link href="/aiwriter" className="relative flex items-center gap-2 hover:text-purple-300 transition font-semibold">
+                                        <span>AI Writer</span>
+                                        <motion.span
+                                            initial={{ opacity: 0.6, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                                            className=" bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full shadow-md"
+                                        >
+                                            New ✨
+                                        </motion.span>
+                                    </Link>
                                     <Link href="/#how-it-works" onClick={closeMobileMenu} className="hover:text-purple-300 transition">How it Works</Link>
                                     <Link href="/#features" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Features</Link>
                                     <Link href="/#about" onClick={closeMobileMenu} className="hover:text-purple-300 transition">About Us</Link>

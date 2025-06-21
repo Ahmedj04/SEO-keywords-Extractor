@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText } from 'lucide-react';
+import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText, Zap} from 'lucide-react';
 import { extractKeywords } from '@/utils/keywordUtils';
 import { getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
 import axios from 'axios';
@@ -256,7 +256,10 @@ export default function Home() {
                                     {btnStatus}
                                 </>
                             ) : (
-                                btnStatus
+                                <> 
+                                    <Zap className="w-5 h-5 mr-2" />  
+                                    {btnStatus}
+                                </>
                             )}
 
                         </button>

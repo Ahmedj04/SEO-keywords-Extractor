@@ -103,8 +103,8 @@ export default function () {
                         <button
                             onClick={handleGenerateContent}
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 rounded-md shadow-lg
-                        hover:from-purple-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
+                            className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semiboldss py-3 rounded-md shadow-lg
+                        hover:from-purple-600 hover:to-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
                         flex items-center justify-center gap-2"
                         >
                             {loading ? (

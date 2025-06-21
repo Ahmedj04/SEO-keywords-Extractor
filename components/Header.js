@@ -124,7 +124,7 @@ export default function Header() {
                                     </button>
                                 </div>
                                 <div className="flex flex-col space-y-6 text-sm sm:text-base">
-                                    <Link href="#" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</Link>
+                                    <Link href="/" onClick={closeMobileMenu} className="hover:text-purple-300 transition">Home</Link>
                                     <Link href="/aiwriter" className="relative flex items-center gap-2 hover:text-purple-300 transition font-semibold">
                                         <span>AI Writer</span>
                                         <motion.span

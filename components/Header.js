@@ -101,7 +101,7 @@ export default function Header() {
                     {/* <Link href="/terms" className="hover:text-purple-300 transition">Terms of Service</Link> */}
                     {/* <Link href="/privacy" className="hover:text-purple-300 transition">Privacy Policy</Link> */}
                 </div>
-                <div className="sm:hidden">
+                <div className="sm:hidden fixed top-5 right-0 p-4 z-50">
                     <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
                         <Menu className="h-6 w-6" />
                     </button>

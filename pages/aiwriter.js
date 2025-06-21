@@ -58,9 +58,10 @@ export default function () {
 
             <Header />
 
-            <div className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto py-16 pxs-4 sm:px-6 lg:px-8">
                 <motion.div
-                    className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
+                    // className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
+                    className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl py-6 px-3 md:px-6 space-y-6"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -141,9 +142,10 @@ export default function () {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.3 }}
-                                className="bg-black/30 border border-gray-700 rounded-xl p-6 mt-6 space-y-4 shadow-inner"
+                                // className="bg-black/30 border border-gray-700 rounded-xl p-6 mt-6 space-y-4 shadow-inner"
+                                className=" py-6 px-3 md:px-6 mt-6 space-y-4 shadow-inner"
                             >
-                                <h3 className="text-xl font-semibold text-white mb-3">Generated Content:</h3>
+                                <h2 className='text-3xl capitalize'>{title}</h2>
                                 <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                                     {generatedContent}
                                 </div>

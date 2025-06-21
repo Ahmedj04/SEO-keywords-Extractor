@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText } from 'lucide-react';
-import { extractKeywords, getMostImportantKeyword } from '@/utils/keywordUtils';
-import { getTopRankingPages, getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
+import { extractKeywords } from '@/utils/keywordUtils';
+import { getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
 import axios from 'axios';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -213,7 +214,12 @@ export default function Home() {
 
             {/* hero section */}
             <section className="max-w-4xl mx-auto space-y-6 mt-10 min-h-[20rem]  flex justify-center items-center">
-                <div className='space-y-6 w-full'>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className='space-y-6 w-full'
+                >
                     <div className="text-center">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl md:leading-16 font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
                             {/* SEO Keyword Miner */}
@@ -303,7 +309,7 @@ export default function Home() {
                                     <p className="text-gray-400 mb-4">
                                         Top {keywords?.length} keywords extracted from the URL.
                                     </p>
-                                    
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {keywords && keywords.length > 0 ? (
                                             <div className="space-y-4">
@@ -385,13 +391,18 @@ export default function Home() {
                             </div>
                         </div>
                     )}
-                </div>
+                </motion.div>
             </section>
 
             {/* How It Works Section */}
             {/* <section id="how-it-works" className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28"> */}
             <section id="how-it-works" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <div className="mx-auto space-y-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mx-auto space-y-10"
+                >
                     <h2 className="text-2xl font-bold text-white text-center">How It Works</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
@@ -479,12 +490,16 @@ export default function Home() {
                                 information.</li>
                         </ul>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             {/* Features Section */}
             <section id="features" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <div className="space-y-8">
+                <motion.div initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-8"
+                >
                     <h2 className="text-2xl font-bold text-white text-center">Key Features</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
@@ -558,11 +573,16 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             <section id="use-cases" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <div className="space-y-4">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-4"
+                >
                     <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
                         <Lightbulb className="w-6 h-6 text-yellow-400" /> Use Cases
                     </h2>
@@ -589,11 +609,16 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             <section id="faqs" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <div className="space-y-6">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-6"
+                >
                     <h2 className="text-2xl font-bold text-white text-center">❓ FAQs</h2>
                     <div className="space-y-4">
                         <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
@@ -621,11 +646,11 @@ export default function Home() {
                             </p>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             {/* content section */}
-             {/* <section className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28">
+            {/* <section className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28">
                 <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
                     <Rocket className="w-6 h-6 text-purple-400" /> How It Works
@@ -716,12 +741,17 @@ export default function Home() {
             </section>  */}
 
             {/* About Us Section */}
-            <section id="about" className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 shadow-lg">
+            <motion.section id="about"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 shadow-lg"
+            >
                 <h3 className="text-2xl font-semibold text-white mb-4 flex items-center justify-center gap-2">
                     <Users className="w-6 h-6 text-purple-400" /> About Us
                 </h3>
                 <p className="mb-2 text-gray-300">
-                     At <strong>SEO Keyword Miner</strong>, we believe that great content starts with smart keyword research. Our platform was born out of a desire to cut through the noise and provide a streamlined, effective way to discover the search terms that actually matter.
+                    At <strong>SEO Keyword Miner</strong>, we believe that great content starts with smart keyword research. Our platform was born out of a desire to cut through the noise and provide a streamlined, effective way to discover the search terms that actually matter.
                 </p>
                 <p className="mb-2 text-gray-300">
                     In a digital world flooded with data, most keyword tools either overwhelm users with complexity or limit access to critical insights. We set out to change that. SEO Keyword Miner is built for content creators, marketers, and SEO professionals who want fast, accurate, and practical keyword data — without the clutter.
@@ -738,10 +768,15 @@ export default function Home() {
                 <p className="text-gray-300">
                     Thank you for being a part of this journey. We’re excited to help you make smarter content decisions, uncover new opportunities, and ultimately grow with confidence in the world of search.
                 </p>
-            </section>
+            </motion.section>
 
             {/* Contact Us Section */}
-            <section id="contact" className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-black/50 border border-purple-500/20 shadow-lg">
+            <motion.section id="contact"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-black/50 border border-purple-500/20 shadow-lg"
+            >
                 <h3 className="text-2xl font-semibold text-white mb-4 flex items-center justify-center gap-2">
                     <Lightbulb className="w-6 h-6 text-yellow-400" /> Contact Us
                 </h3>
@@ -803,7 +838,7 @@ export default function Home() {
                         Sorry, there was an error sending your message. Please try again.
                     </div>
                 )}
-            </section>
+            </motion.section>
 
             {/* <section id="contact" className="py-16 bg-black/50 backdrop-blur-md border-b border-gray-800 px-4 sm:px-6 lg:px-8">
             <div className="w-full mx-auto space-y-8">

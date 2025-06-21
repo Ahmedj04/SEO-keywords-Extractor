@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -8,12 +9,18 @@ const TermsOfService = () => {
 
             <Header />
 
-            <div className="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-8">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-6xl mx-auto py-16"
+                >
+                <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-center mb-8"
+                >
                     Terms of Service
                 </h1>
 
-                <div className="bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 space-y-6">
+                <div className="space-y-6">
                     <p>
                         These Terms of Service ("Terms") govern your access to and use of SEO Keyword Miner ("the Service"). By using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, please do not use the Service.
                     </p>
@@ -42,7 +49,7 @@ const TermsOfService = () => {
                         These Terms may be updated occasionally. Continued use of the Service after changes are made constitutes your acceptance of the revised Terms.
                     </p>
                 </div>
-            </div>
+            </motion.div>
 
             <Footer />
         </div>

@@ -1,19 +1,24 @@
 import React from 'react'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 export default function () {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8">
-
             <Header />
 
-            <div className="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-8">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-6xl mx-auto py-16"
+            >
+                <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-center mb-8">
                     Privacy Policy
                 </h1>
 
-                <div className="bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 space-y-6">
+                <div className="space-y-6">
                     <p>
                         SEO Keyword Miner is committed to respecting your privacy. As of now, this Service does not collect, store, or process any personal information from users.
                     </p>
@@ -34,8 +39,7 @@ export default function () {
                         By using SEO Keyword Miner, you acknowledge and agree to this data-minimal approach. If you have any concerns about privacy, you are encouraged to inspect the network traffic from your browser or review the open-source code (if applicable) to verify this privacy stance.
                     </p>
                 </div>
-            </div>
-
+            </motion.div>
 
             <Footer />
         </div>

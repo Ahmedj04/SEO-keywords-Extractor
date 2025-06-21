@@ -159,7 +159,7 @@ export default function () {
             <motion.section
                 id="ai-writer-how-it-works"
                 // className="max-w-6xl mx-auto bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
-                className="max-w-6xl mx-auto bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
+                className="max-w-6xl mx-auto  p-6 space-y-6"
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"

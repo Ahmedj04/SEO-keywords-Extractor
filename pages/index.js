@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText, Zap} from 'lucide-react';
+import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText, Zap } from 'lucide-react';
 import { extractKeywords } from '@/utils/keywordUtils';
 import { getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
 import axios from 'axios';
@@ -51,6 +51,7 @@ export default function Home() {
     const handleGetKeywords = async () => {
         if (!url) {
             setError('Please enter a URL.');
+            // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
             return;
         }
 
@@ -131,16 +132,16 @@ export default function Home() {
             setContentSuggestions(suggestions);
 
         } catch (error) {
-            if (error.response.data.error) {
-                setError(error.response.data.error);
+            let errorMessage;
+            if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else {
+                errorMessage = "An error occurred while extracting keywords. Please try again later.";
             }
-            else if (error.message) {
-                setError(error.message)
-
-            }
-            else {
-                setError("An error occurred while extracting keywords. Please try again later.")
-            }
+            setError(errorMessage);
+            // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
 
         } finally {
             setLoading(false);
@@ -256,8 +257,8 @@ export default function Home() {
                                     {btnStatus}
                                 </>
                             ) : (
-                                <> 
-                                    <Zap className="w-5 h-5 mr-2" />  
+                                <>
+                                    <Zap className="w-5 h-5 mr-2" />
                                     {btnStatus}
                                 </>
                             )}
@@ -580,7 +581,7 @@ export default function Home() {
             </section>
 
             <section id="use-cases" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -616,7 +617,7 @@ export default function Home() {
             </section>
 
             <section id="faqs" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -651,97 +652,6 @@ export default function Home() {
                     </div>
                 </motion.div>
             </section>
-
-            {/* content section */}
-            {/* <section className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28">
-                <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-                    <Rocket className="w-6 h-6 text-purple-400" /> How It Works
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                            <Search className="w-8 h-8 text-blue-400 mb-2" />
-                            <h3 className="font-semibold text-lg text-white">Enter URL</h3>
-                            <p className="text-gray-400">Paste a website URL into the input field.</p>
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                    <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                        <ListChecks className="w-8 h-8 text-green-400 mb-2" />
-                        <h3 className="font-semibold text-lg text-white">Analyze</h3>
-                        <p className="text-gray-400">Click "Mine Keywords" to analyze the content.</p>
-                    </div>
-                    </div>
-                    <div className="space-y-2">
-                    <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                        <TrendingUp className="w-8 h-8 text-purple-400 mb-2" />
-                        <h3 className="font-semibold text-lg text-white">Get Keywords</h3>
-                        <p className="text-gray-400">View the extracted keywords.</p>
-                    </div>
-                    </div>
-                </div>
-                </div>
-
-                <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-                    <Lightbulb className="w-6 h-6 text-yellow-400" /> Use Cases
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                        <Users className="w-8 h-8 text-pink-400 mb-2" />
-                        <h3 className="font-semibold text-lg text-white">Competitor Analysis</h3>
-                        <p className="text-gray-400">Analyze competitors' SEO strategy.</p>
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                    <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                        <Search className="w-8 h-8 text-orange-400 mb-2" />
-                        <h3 className="font-semibold text-lg text-white">Content Creation</h3>
-                        <p className="text-gray-400">Research keywords for content writing.</p>
-                    </div>
-                    </div>
-                    <div className="space-y-2">
-                    <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                        <TrendingUp className="w-8 h-8 text-cyan-400 mb-2" />
-                        <h3 className="font-semibold text-lg text-white">Marketing Trends</h3>
-                        <p className="text-gray-400">Discover trends for digital marketing.</p>
-                    </div>
-                    </div>
-                </div>
-                </div>
-
-                <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-white text-center">❓ FAQs</h2>
-                    <div className="space-y-4">
-                    <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                        <h3 className="font-semibold text-lg text-white">
-                        🔗 Does it work for every website?
-                        </h3>
-                        <p className="text-gray-400">
-                        Most public pages are supported. Some may restrict bots or have minimal readable content.
-                        </p>
-                    </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                        <h3 className="font-semibold text-lg text-white">
-                        💸 Is this tool free?
-                        </h3>
-                        <p className="text-gray-400">
-                        Absolutely! Enjoy full functionality with zero cost.
-                        </p>
-                    </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                        <h3 className="font-semibold text-lg text-white">
-                        🧠 What keywords do I get?
-                        </h3>
-                        <p className="text-gray-400">
-                        We extract SEO-relevant terms directly from the content you provide.
-                        </p>
-                    </div>
-                    </div>
-                </div>
-            </section>  */}
 
             {/* About Us Section */}
             <motion.section id="about"

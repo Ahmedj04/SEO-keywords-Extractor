@@ -29,8 +29,5 @@ export const generateArticleContent = async (title, keywords, wordCount) => {
             'Content-Type': 'application/json',
         }
     });
-    if (!response.data || !response.data.content) {
-        throw new Error('Failed to generate content.');
-    }
     return response.data.content;
 }

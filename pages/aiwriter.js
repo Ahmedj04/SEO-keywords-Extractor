@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, FileText, Lightbulb, PenTool, ClipboardCheck } from 'lucide-react';
+import { Sparkles, Loader2, FileText, Lightbulb, PenTool, ClipboardCheck, Copy, Check } from 'lucide-react';
 import { generateArticleContent } from '@/utils/seoUtils';
 
 
@@ -12,6 +12,10 @@ export default function () {
     const [generatedContent, setGeneratedContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [copyStatus, setCopyStatus] = useState(false); // State for copy feedback
+    const wordCountOptions = [100, 300, 800, 1000];
+    const [wordCount, setWordCount] = useState(wordCountOptions[1]); // New state for word count, default to 200
+
 
     const handleGenerateContent = async () => {
         if (!title || !keywords) {
@@ -24,7 +28,7 @@ export default function () {
         setGeneratedContent('');
 
         try {
-            const articleContent = await generateArticleContent(title, keywords);
+            const articleContent = await generateArticleContent(title, keywords, wordCount);
             setGeneratedContent(articleContent);
         } catch (err) {
             console.error('Error generating content:', err);
@@ -32,6 +36,31 @@ export default function () {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCopyContent = () => {
+        // Use document.execCommand('copy') as navigator.clipboard.writeText() may not work in iframes
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                setCopyStatus(true);
+            } else {
+                setCopyStatus(false);
+            }
+        } catch (err) {
+            setCopyStatus(false);
+            console.error('Copy command failed:', err);
+        }
+        document.body.removeChild(textArea);
+
+        // Clear feedback after a short delay
+        setTimeout(() => {
+            setCopyStatus(false);
+        }, 2000);
     };
 
     // Animation variants
@@ -53,6 +82,7 @@ export default function () {
             opacity: 1,
         },
     };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8">
 
@@ -60,7 +90,6 @@ export default function () {
 
             <div className="max-w-4xl mx-auto py-16 pxs-4 sm:px-6 lg:px-8">
                 <motion.div
-                    // className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
                     className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl py-6 px-3 md:px-6 space-y-6"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -69,6 +98,9 @@ export default function () {
                     <h2 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-6 flex items-center justify-center gap-3">
                         <Sparkles className="h-8 w-8 text-yellow-300" /> AI Writer
                     </h2>
+                    <p className="text-gray-400 text-base text-center">
+                        Create SEO-optimized content effortlessly. Share your topic and keywords, and our AI will simplify your content creation process.
+                    </p>
 
                     {/* Input Fields */}
                     <div className="space-y-4">
@@ -99,6 +131,36 @@ export default function () {
                                 className="w-full bg-black/30 text-white border-purple-500/20 placeholder:text-gray-500 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                             ></textarea>
                         </div>
+
+                        <div>
+                            <label className="block text-gray-300 text-sm font-semibold mb-2">
+                                Content Style:
+                            </label>
+                            <div className="flex justify-center flex-wrap gap-3 py-2">
+                                {wordCountOptions.map((count) => (
+                                        (<button
+                                                key={count}
+                                                onClick={() => setWordCount(count)}
+                                                className={`
+                                                    px-5 py-2 rounded-full border
+                                                    text-sm font-medium
+                                                    transition-all duration-200 ease-in-out
+                                                    ${wordCount === count
+                                                        ? 'bg-purple-600 border-purple-600 text-white shadow-lg'
+                                                        : 'bg-black/20 border-purple-500/20 text-gray-300 hover:bg-purple-500/10 hover:border-purple-500/30'
+                                                    }
+                                        `}
+                                            >
+                                                {count <= 200 ? 'Short & Sweet' :
+                                                    count <= 500 ? 'Concise & Clear' :
+                                                        count <= 800 ? 'In-Depth & Detailed' :
+                                                            'Comprehensive & Thorough'}
+                                            </button>
+                                        )
+                                ))}
+                            </div>
+                        </div>
+
 
                         <button
                             onClick={handleGenerateContent}
@@ -145,7 +207,19 @@ export default function () {
                                 // className="bg-black/30 border border-gray-700 rounded-xl p-6 mt-6 space-y-4 shadow-inner"
                                 className=" py-6 px-3 md:px-6 mt-6 space-y-4 shadow-inner"
                             >
-                                <h2 className='text-3xl capitalize'>{title}</h2>
+                                <div className='flex items-center justify-between'>
+                                    <h2 className='text-3xl capitalize'>{title}</h2>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={handleCopyContent}
+                                            title="Copy to clipboard"
+                                            className='cursor-pointer'
+                                        >
+                                            {copyStatus ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+
+                                        </button>
+                                    </div>
+                                </div>
                                 <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                                     {generatedContent}
                                 </div>

@@ -374,7 +374,7 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
     }
 };
 
-export const generateArticleContent = async (title, keywords) => {
+export const generateArticleContent = async (title, keywords, wordCount) => {
     const prompt = `
         You are an expert SEO content writer. Your task is to generate high-quality, SEO-optimized, and readable content for a webpage.
 
@@ -383,7 +383,7 @@ export const generateArticleContent = async (title, keywords) => {
         **Key SEO Keywords to Incorporate (naturally and contextually):** ${keywords}
 
         **Instructions:**
-        1.  Write a compelling and informative article of approximately 400-500 words.
+        1.  Write a compelling and informative article of approximately ${wordCount-100}-${wordCount} words.
         2.  Structure the content with an introduction, main body paragraphs, and a brief conclusion.
         3.  Integrate the provided keywords naturally throughout the text. Do NOT force keywords.
         4.  Ensure the content is engaging, provides value to the reader, and demonstrates expertise on the topic.

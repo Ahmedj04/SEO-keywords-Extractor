@@ -23,8 +23,8 @@ export const generateContentSuggestions = async (metadataResponse, gapKeywords) 
     return response.data;
 }
 
-export const generateArticleContent = async (title, keywords) => {
-    const response = await axios.post('/api/generateArticleContent', { title, keywords }, {
+export const generateArticleContent = async (title, keywords, wordCount) => {
+    const response = await axios.post('/api/generateArticleContent', { title, keywords, wordCount }, {
         headers: {
             'Content-Type': 'application/json',
         }

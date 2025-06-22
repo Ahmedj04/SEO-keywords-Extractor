@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, FileText, Lightbulb, PenTool, ClipboardCheck, Copy, Check } from 'lucide-react';
 import { generateArticleContent } from '@/utils/seoUtils';
 
-
 export default function () {
     const [title, setTitle] = useState('');
     const [keywords, setKeywords] = useState(''); // Comma-separated keywords
@@ -15,7 +14,6 @@ export default function () {
     const [copyStatus, setCopyStatus] = useState(false); // State for copy feedback
     const wordCountOptions = [100, 300, 800, 1000];
     const [wordCount, setWordCount] = useState(wordCountOptions[1]); // New state for word count, default to 200
-
 
     const handleGenerateContent = async () => {
         if (!title || !keywords) {
@@ -138,29 +136,28 @@ export default function () {
                             </label>
                             <div className="flex justify-center flex-wrap gap-3 py-2">
                                 {wordCountOptions.map((count) => (
-                                        (<button
-                                                key={count}
-                                                onClick={() => setWordCount(count)}
-                                                className={`
+                                    (<button
+                                        key={count}
+                                        onClick={() => setWordCount(count)}
+                                        className={`
                                                     px-5 py-2 rounded-full border
                                                     text-sm font-medium
                                                     transition-all duration-200 ease-in-out
                                                     ${wordCount === count
-                                                        ? 'bg-purple-600 border-purple-600 text-white shadow-lg'
-                                                        : 'bg-black/20 border-purple-500/20 text-gray-300 hover:bg-purple-500/10 hover:border-purple-500/30'
-                                                    }
+                                                ? 'bg-purple-600 border-purple-600 text-white shadow-lg'
+                                                : 'bg-black/20 border-purple-500/20 text-gray-300 hover:bg-purple-500/10 hover:border-purple-500/30'
+                                            }
                                         `}
-                                            >
-                                                {count <= 200 ? 'Short & Sweet' :
-                                                    count <= 500 ? 'Concise & Clear' :
-                                                        count <= 800 ? 'In-Depth & Detailed' :
-                                                            'Comprehensive & Thorough'}
-                                            </button>
-                                        )
+                                    >
+                                        {count <= 200 ? 'Short & Sweet' :
+                                            count <= 500 ? 'Concise & Clear' :
+                                                count <= 800 ? 'In-Depth & Detailed' :
+                                                    'Comprehensive & Thorough'}
+                                    </button>
+                                    )
                                 ))}
                             </div>
                         </div>
-
 
                         <button
                             onClick={handleGenerateContent}
@@ -215,7 +212,7 @@ export default function () {
                                             title="Copy to clipboard"
                                             className='cursor-pointer'
                                         >
-                                            {copyStatus ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                            {copyStatus ? <div className='flex items-center gap-1'> <Check className="h-4 w-4" /> <span className='text-[12px]'>Copied</span> </div> : <Copy className="h-4 w-4" />}
 
                                         </button>
                                     </div>
@@ -280,7 +277,6 @@ export default function () {
                     saving you time and effort in your content creation process.
                 </motion.p>
             </motion.section>
-
 
             <Footer />
         </div>

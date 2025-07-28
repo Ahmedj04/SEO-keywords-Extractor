@@ -312,7 +312,7 @@ export async function getCompetitors(url){
     const prompt = `Analyze the website ${url}. Based on its services, products, target audience, and business model, identify at most three main competitors. Provide the URLs of these competitor websites in an array structure (required). Do not include explanations.`;
     
     try{
-        const response = await geminiCall({ modelName: "gemini-2.5-flash-preview-04-17", prompt });
+        const response = await geminiCall({ modelName: "gemini-2.5-flash", prompt });
 
         const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
         try {

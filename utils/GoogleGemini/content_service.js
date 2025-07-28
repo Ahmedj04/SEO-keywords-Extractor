@@ -205,12 +205,6 @@ Follow these instructions meticulously:
 `;
 
 
-
-// Initialize the Generative AI model
-// const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" ,systemInstruction: systemPrompt});
-// const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" ,systemInstruction: systemPrompt});
-// const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" ,systemInstruction: systemPrompt});
-
 export async function getKeywords(url) {
 
     // const prompt = `Extract the top 10 to 15 keywords related to SEO from the content of the webpage at the following URL: ${url}
@@ -307,7 +301,6 @@ export async function getKeywords(url) {
     }   
 }
 
-
 export async function getCompetitors(url){
     const prompt = `Analyze the website ${url}. Based on its services, products, target audience, and business model, identify at most three main competitors. Provide the URLs of these competitor websites in an array structure (required). Do not include explanations.`;
     
@@ -327,6 +320,7 @@ export async function getCompetitors(url){
         throw new Error('Error while fetching competitors url', { cause: error }) ; 
     }
 }
+
 // Given the following HTML content of a webpage:
 //  Use LLM to generate content optimization suggestions
 export const generateContentSuggestions = async (metadata, gapKeywords) => {
@@ -358,15 +352,14 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
     `;
 
     try {
-        // const response = await geminiCall({ modelName: "gemini-2.5-flash-preview-04-17", prompt });
         const response = await geminiCall({ modelName: "gemini-2.0-flash", prompt });
         const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
         try {
             const ContentSuggestions = JSON.parse(jsonString);
-            return ContentSuggestions; // Return the extracted URLs in the response.
+            return ContentSuggestions;
         } catch (parseError) {
             console.error('Error parsing JSON. Returning raw text:', parseError);
-            return response; // Send raw text, and indicate it was not JSON.
+            return response;
         }
     } catch (error) {
         // console.error("Error generating content suggestions:", error);

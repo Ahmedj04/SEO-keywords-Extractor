@@ -302,10 +302,11 @@ export async function getKeywords(url) {
 }
 
 export async function getCompetitors(url){
-    const prompt = `Analyze the website ${url}. Based on its services, products, target audience, and business model, identify at most three main competitors. Provide the URLs of these competitor websites in an array structure (required). Do not include explanations.`;
+    const prompt = `Analyze the website at ${url}. Identify its main competitors based on its services, products, target audience, and business model. List at most three competitor website URLs in a JSON array. Do not include any other text or explanations.`;
     
     try{
         const response = await geminiCall({ modelName: "gemini-2.5-flash", prompt });
+        console.log(response);
 
         const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
         try {

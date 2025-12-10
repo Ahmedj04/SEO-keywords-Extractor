@@ -183,6 +183,69 @@ export default function Home() {
         }
     };
 
+    // ===== Export Report Functionality =====
+    const downloadFile = (filename, content, mimeType) => {
+        const blob = new Blob([content], { type: mimeType || 'text/plain;charset=utf-8;' });
+        const urlObj = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = urlObj;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(urlObj);
+    };
+
+    const escapeCsv = (value) => {
+        if (value === null || value === undefined) return '';
+        const str = String(value);
+        if (/[",\n,]/.test(str)) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    };
+
+    const buildCsvReport = () => {
+        const timestamp = new Date().toISOString();
+        const suggestionText = typeof contentSuggestions === 'object' && contentSuggestions?.text
+            ? contentSuggestions.text
+            : (contentSuggestions || '');
+
+        const rows = [
+            ['Report For URL', url || ''],
+            ['Generated At', timestamp],
+            ['Keywords Count', keywords?.length || 0],
+            ['Keywords', (keywords && keywords.length ? keywords.join(' | ') : '')],
+            ['Keyword Gaps Count', gaps?.length || 0],
+            ['Top 30 Keyword Gaps', (gaps && gaps.length ? gaps.slice(0, 30).join(' | ') : '')],
+            ['Competitor URLs', (competitorUrls && competitorUrls.length ? competitorUrls.join(' | ') : '')],
+            ['Content Suggestion', suggestionText],
+        ];
+
+        const csv = rows.map(r => r.map(escapeCsv).join(',')).join('\n');
+        return 'Section,Data\n' + csv + '\n';
+    };
+
+    const exportReportAsCSV = () => {
+        const csv = buildCsvReport();
+        const filename = `seo-report-${(url || 'report').replace(/[^a-z0-9\-\.]/gi, '_')}.csv`;
+        downloadFile(filename, csv, 'text/csv;charset=utf-8;');
+    };
+
+    const exportReportAsJSON = () => {
+        const timestamp = new Date().toISOString();
+        const report = {
+            url,
+            generatedAt: timestamp,
+            keywords: keywords || [],
+            keywordGaps: gaps || [],
+            competitorUrls: competitorUrls || [],
+            contentSuggestions: contentSuggestions || null,
+        };
+        const filename = `seo-report-${(url || 'report').replace(/[^a-z0-9\-\.]/gi, '_')}.json`;
+        downloadFile(filename, JSON.stringify(report, null, 2), 'application/json;charset=utf-8;');
+    };
+
     // to load adsense script 
     useEffect(() => {
         loadAdSenseScript(); // Load AdSense script on component mount
@@ -309,10 +372,34 @@ export default function Home() {
                         <div className="opacity-0 animate-fadeIn delay-300">
                             <div className="bg-black/20 border-purple-500/30 rounded-md">
                                 <div className="p-6">
-                                    <h2 className="text-white text-2xl font-semibold mb-2">SEO Keywords</h2>
-                                    <p className="text-gray-400 mb-4">
-                                        Top {keywords?.length} keywords extracted from the URL.
-                                    </p>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h2 className="text-white text-2xl font-semibold mb-2">SEO Keywords</h2>
+                                            <p className="text-gray-400 mb-4">
+                                                Top {keywords?.length} keywords extracted from the URL.
+                                            </p>
+                                        </div>
+                                        
+
+                                        {/* Export buttons */}
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={exportReportAsCSV}
+                                                // className="bg-blue-600/80 hover:bg-blue-600 text-white text-xs px-4 py-2 rounded-md"
+                                                className="cursor-pointer hover:text-purple-300 text-white text-xs px-4 py-2 rounded-md"
+                                            >
+                                                Export Excel
+                                            </button>
+                                            <button
+                                                onClick={exportReportAsJSON}
+                                                // className="bg-purple-600/80 hover:bg-purple-600 text-white text-xs px-4 py-2 rounded-md"
+                                                className="cursor-pointer hover:text-purple-300 text-white text-xs px-4 py-2 rounded-md"
+                                            >
+                                                Export JSON
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {keywords && keywords.length > 0 ? (

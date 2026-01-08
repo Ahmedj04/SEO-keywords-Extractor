@@ -123,13 +123,13 @@ export default function Home() {
                 keyword => !currentPageKeywords.keywords.includes(keyword)
             );
 
-            setBtnStatus("Generating Suggestions...");
-            const suggestions = await generateContentSuggestions(metadataResponse.data, calculatedGaps);
+            // setBtnStatus("Generating Suggestions...");
+            // const suggestions = await generateContentSuggestions(metadataResponse.data, calculatedGaps);
 
             setKeywords(currentPageKeywords.keywords);
             setGaps(calculatedGaps);
             setCompetitorUrls(topPageUrls);
-            setContentSuggestions(suggestions);
+            // setContentSuggestions(suggestions);
 
         } catch (error) {
             let errorMessage;
@@ -461,11 +461,12 @@ export default function Home() {
                                             </div>
                                         )}
                                     </div>
-
-                                    {contentSuggestions ? (
+                                    
+                                    {/* kept commented for now for prevent unnessary api usage  */}
+                                    {/* commenting the function call for it to above */}
+                                    {/* {contentSuggestions ? (
                                         <div className="mt-8 space-y-4">
                                             <div className="bg-black/50 border-purple-500/20 rounded-md">
-                                                {/* <div className="bg-black/20 border-purple-500/30 rounded-md"> */}
                                                 <div className="p-4">
                                                     <h3 className="text-white text-lg flex items-center gap-2">
                                                         <Lightbulb className="w-5 h-5 text-yellow-400" />
@@ -477,7 +478,7 @@ export default function Home() {
                                                 </div>
                                             </div>
                                         </div>
-                                    ) : null}
+                                    ) : null} */}
                                 </div>
                             </div>
                         </div>

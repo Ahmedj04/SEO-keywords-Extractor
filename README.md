@@ -1,6 +1,6 @@
 # SEO Keywords Extractor
 
-**Modern web tool that extracts high-impact SEO keywords by analyzing webpage content from any URL**.
+**Modern AI-powered SEO tool** that helps you discover high-impact keywords, analyze competitors, find keyword gaps — all from just a URL.
 
 Built with **Next.js** • **JavaScript** • **Tailwind CSS**
 
@@ -11,16 +11,25 @@ Built with **Next.js** • **JavaScript** • **Tailwind CSS**
 Current main approach:  
 Enter any website URL → tool fetches the content → **AI-powered analysis** extracts important keywords, phrases and provides SEO insights.
 
-## ✨ Current Features
+## ✨ Main Features
 
-- URL-based webpage content analysis  
-- **AI-enhanced** keyword & key phrase extraction  
-- Focus on high-impact / relevant terms
-- Keyword Gap Analysis  
+- **Instant Keyword Extraction** — enter any URL and get high-impact keywords  
+- **AI-enhanced analysis** — uses modern language models + NLP for contextual understanding  
+- **Keyword Gap Analysis** — discover opportunities your site is missing  
+- **AI-enhanced** keyword & key phrase extraction   
 - Basic Competitor Analysis
 - Clean, minimalistic single-page interface  
 - Free to use (no login required)  
 - Fast processing for most pages
+
+### New: AI Writer
+Generate complete **SEO-optimized articles** directly in the tool!  
+Just provide:
+- Content title/topic
+- Target keywords (comma-separated)
+- Desired style (Short & Sweet / Concise & Clear / In-Depth / Comprehensive)
+
+→ One-click generation of ready-to-publish content
 
 ## 🚀 Tech Stack
 

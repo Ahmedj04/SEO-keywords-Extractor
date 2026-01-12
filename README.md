@@ -15,8 +15,7 @@ Enter any website URL → tool fetches the content → **AI-powered analysis** e
 
 - **Instant Keyword Extraction** — enter any URL and get high-impact keywords  
 - **AI-enhanced analysis** — uses modern language models + NLP for contextual understanding  
-- **Keyword Gap Analysis** — discover opportunities your site is missing  
-- **AI-enhanced** keyword & key phrase extraction   
+- **Keyword Gap Analysis** — discover opportunities your site is missing    
 - Basic Competitor Analysis
 - Clean, minimalistic single-page interface  
 - Free to use (no login required)  

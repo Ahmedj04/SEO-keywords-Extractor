@@ -1,5 +1,6 @@
 # SEO Keywords Extractor
 
+**Modern web tool that extracts high-impact SEO keywords by analyzing webpage content from any URL**.
 Fast & simple tool to extract the most important SEO keywords from any text  
 Built with **Next.js** • **JavaScript** • **Tailwind CSS**
 
@@ -8,14 +9,28 @@ Built with **Next.js** • **JavaScript** • **Tailwind CSS**
 
 ![VN20260112_160520-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/23d8dc0b-4005-4435-ad9e-3c72ea8703d3)
 
+Current main approach:  
+Enter any website URL → tool fetches the content → **AI-powered analysis** extracts important keywords, phrases and provides SEO insights.
 
+## ✨ Current Features
 
-## ✨ Features
+- URL-based webpage content analysis  
+- **AI-enhanced** keyword & key phrase extraction  
+- Focus on high-impact / relevant terms
+- Keyword Gap Analysis  
+- Basic Competitor Analysis
+- Clean, minimalistic single-page interface  
+- Free to use (no login required)  
+- Fast processing for most pages
 
-- Extract high-quality main keywords & key phrases
-- Clean modern interface
-- One-click copy results
-- Works great on long articles
+## 🚀 Tech Stack
+
+- **Framework**: Next.js
+- **Language**: JavaScript
+- **Styling**: Tailwind CSS 
+- **Deployment**: Vercel  
+- **Backend fetching**: API routes  
+- **AI part**: Google Gemini API
 
 ## 🚀 Quick Start
 

@@ -1,11 +1,10 @@
 # SEO Keywords Extractor
 
 **Modern web tool that extracts high-impact SEO keywords by analyzing webpage content from any URL**.
-Fast & simple tool to extract the most important SEO keywords from any text  
+
 Built with **Next.js** • **JavaScript** • **Tailwind CSS**
 
 🔗 **Live Demo:** https://seokeywordminer.vercel.app
-
 
 ![VN20260112_160520-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/23d8dc0b-4005-4435-ad9e-3c72ea8703d3)
 

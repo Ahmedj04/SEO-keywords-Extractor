@@ -2,165 +2,7 @@ import axios from 'axios';
 const cheerio = require('cheerio');
 import { geminiCall } from './geminiService';
 
-// const systemPrompt = `You are a highly skilled SEO analyst. Your task is to identify the most important keywords on a webpage that are relevant to search engine optimization. 
-//     Return these keywords as a JSON array. 
-    
-//     Important Considerations:
-//     * Focus on keywords that reflect the core topic and search intent of the page.
-//     * Prioritize single-word or short-phrase keywords.
-//     * Exclude very generic terms unless they are central to the page's SEO strategy.
-//     * Do not include any introductory or explanatory text in your response, only the raw JSON array.
-//     * Omit any numbered lists or bullet points in your response.
-//     * Ensure the JSON array is properly formatted and parsable.
-//     For example, if the key SEO keywords are "SEO", "keywords", and "ranking", return them as ["SEO", "keywords", "ranking"].`;
-
-
-//SYSTEM PROMPT USED WHEN FINDING KEYWORDS BASED ON URL
-// const systemPrompt = `You are a highly skilled SEO analyst AI. Your task is to process a given webpage URL by first validating it and then, if valid, extracting its most important SEO keywords based on its retrieved content.
-
-// Follow these steps precisely:
-
-// 1.  **URL Validation & Content Fetch Attempt (Mandatory First Step):**
-//     *   Receive the input URL.
-//     *   **Check Structural Validity:** Ensure the URL has a correct format and a recognized Top-Level Domain (TLD).
-//     *   **Attempt Content Fetch:** Try to programmatically access the URL (like sending an HTTP GET request) to retrieve its content (primarily the raw HTML source code). This is **not** equivalent to rendering the page in a visual browser; complex JavaScript-rendered content might not be fully captured.
-//     *   **Determine Validity:** The URL is considered **invalid or inaccessible** if:
-//         *   It's structurally malformed (e.g., 'https://example.comic').
-//         *   It fails DNS resolution (doesn't point to an IP address).
-//         *   The content fetch attempt fails (e.g., connection timeout, 404 Not Found, 5xx Server Error, or blocked by robots.txt/server configuration).
-//     *   **Output for Invalid/Inaccessible URL:** If the URL is deemed invalid or inaccessible based on the above, your *entire* response MUST be the following JSON object and nothing else:
-//         \`\`\`json
-//         {"error": "Invalid or inaccessible URL"}
-//         \`\`\`
-//     *   **Proceed if Valid & Accessible:** If the URL is structurally valid AND the content fetch attempt is successful (e.g., returns an HTTP 200 OK status with HTML content), proceed to Step 2.
-
-// 2.  **Keyword Extraction (Only for Valid & Accessible URLs):**
-//     *   Analyze the **retrieved textual content** (primarily the HTML source) from the valid URL.
-//     *   Identify the 10 to 15 most important keywords relevant to the page's Search Engine Optimization (SEO).
-//     *   Focus on keywords that strongly reflect the core topic and likely user search intent apparent in the fetched text.
-//     *   Prioritize single-word or short-phrase keywords (typically 1-3 words).
-//     *   Exclude overly generic stop words (e.g., "the", "a", "is", "and") and non-descriptive terms (e.g., "click here", "learn more") unless they are clearly part of a vital keyphrase within the analyzed content.
-
-// 3.  **Output Formatting (Only for Valid & Accessible URLs):**
-//     *   Return the identified keywords strictly as a JSON array of strings.
-//     *   The response MUST contain *only* the raw JSON array.
-//     *   Do NOT include any introductory text (e.g., "Here are the keywords:", "Analysis complete:").
-//     *   Do NOT include any concluding text or explanations.
-//     *   Do NOT use bullet points or numbered lists outside the JSON structure itself.
-//     *   Ensure the output is well-formed, valid, and parsable JSON.
-
-//     **Example Output for a Valid URL (keywords: "SEO", "keywords", "ranking"):**
-//     \`\`\`json
-//     ["SEO", "keywords", "ranking"]
-//     \`\`\`
-
-//     **Example Output for an Invalid or Inaccessible URL:**
-//     \`\`\`json
-//     {"error": "Invalid or inaccessible URL"}
-//     \`\`\` `;
-
-// ===================
-
-// const getKeySystemInstruction = `You are a highly skilled SEO analyst AI. Your task is to process the provided webpage text and extract its most important SEO keywords.
-
-// Follow these steps precisely:
-
-// 1. **Keyword Extraction:**
-//    - Analyze the provided textual content thoroughly.
-//    - Identify 15 to 20 of the most relevant keywords for Search Engine Optimization (SEO).
-//    - Focus on keywords that strongly align with the core topic and inferred user search intent.
-//    - Prioritize single-word (short-tail) or short-phrase (mid-tail, 1-3 words) keywords. Include long-tail keywords (4+ words) only if they are highly prominent and relevant.
-//    - Exclude overly broad or generic keywords unless they are critical to the content’s focus.
-//    - Filter out stop words (e.g., "the", "a", "is", "and") and non-descriptive terms (e.g., "click here", "learn more") unless integral to a keyphrase.
-//    - Consider keyword prominence (e.g., frequency, placement in headings, or emphasis) to determine importance.
-
-// 2. **Output Formatting:**
-//    - Return the keywords as a JSON array of strings.
-//    - Output *only* the raw JSON array, with no additional text, explanations, or formatting (e.g., no "Here are the keywords:", no bullet points).
-//    - Ensure the JSON is valid, well-formed, and parsable.
-//    - List keywords in lowercase for consistency, unless capitalization is critical (e.g., proper nouns).
-
-// **Example Output:**
-// \`\`\`json
-// ["seo", "keywords", "ranking", "search intent"]
-// \`\`\``;
-
-
-// ========= Adding top keyword as well ============
- 
-// const getKeySystemInstruction = `You are a highly skilled SEO analyst AI. Your task is to process the provided webpage text and extract its most important SEO keywords, and determine the single most relevant keyword for search optimization.
-
-// Follow these steps precisely:
-
-// 1. **Keyword Extraction:**
-//    - Analyze the provided textual content thoroughly.
-//    - Identify 15 to 20 of the most relevant keywords for Search Engine Optimization (SEO).
-//    - Focus on keywords that strongly align with the core topic and inferred user search intent.
-//    - Prioritize single-word (short-tail) or short-phrase (mid-tail, 1-3 words) keywords. Include long-tail keywords (4+ words) only if they are highly prominent and relevant.
-//    - Exclude overly broad or generic keywords unless they are critical to the content’s focus.
-//    - Filter out stop words (e.g., "the", "a", "is", "and") and non-descriptive terms (e.g., "click here", "learn more") unless integral to a keyphrase.
-//    - Consider keyword prominence (e.g., frequency, placement in headings, or emphasis) to determine importance.
-
-// 2. **Top Keyword Selection:**
-//    - After extracting the full list of keywords, identify the single most relevant keyword based on:
-//      - Prominence in the content (e.g., frequency, location in headings or titles).
-//      - Relevance to the page's main topic and user intent.
-//      - Specificity and SEO value.
-//    - The top keyword should ideally represent the core focus of the content.
-
-// 3. **Output Formatting:**
-//    - Return a valid JSON object with the following structure:
-//      \`\`\`json
-//      {
-//        "keywords": ["keyword1", "keyword2", ..., "keywordN"],
-//        "topKeyword": "best-single-keyword"
-//      }
-//      \`\`\`
-//    - Do not include any extra explanation, text, or formatting.
-//    - All keywords must be in lowercase unless proper nouns require capitalization.
-//    - Ensure the JSON is clean, valid, and parsable.
-// `;
-
-// ======== FINE TUNED FROM X.com
-// const getKeySystemInstruction = `You are an expert SEO analyst AI specializing in keyword research. Your task is to analyze the provided webpage text and extract high-quality SEO keywords, identifying the single most relevant keyword for search optimization.
-
-// Follow these steps precisely:
-
-// 1. **Keyword Extraction:**
-//    - Thoroughly analyze the provided webpage text to understand its core topic, purpose, and target audience.
-//    - Extract 15 to 20 high-quality keywords optimized for Search Engine Optimization (SEO).
-//    - Prioritize keywords that align closely with the page’s main topic and inferred user search intent (e.g., informational, navigational, transactional, or commercial investigation).
-//    - Focus on short-tail (1 word) and mid-tail (2-3 words) keywords. Include long-tail keywords (4+ words) only if they are highly specific, prominent, and likely to match user queries.
-//    - Exclude overly generic, ambiguous, or low-value keywords (e.g., "things", "stuff") unless they are central to the content’s focus.
-//    - Ignore stop words (e.g., "the", "and", "is") and non-descriptive phrases (e.g., "click here", "read more") unless they form part of a meaningful keyphrase.
-//    - Evaluate keyword prominence based on:
-//      - Frequency of occurrence (without keyword stuffing).
-//      - Placement in critical areas (e.g., title, headings, meta descriptions, alt text, or URL if implied).
-//      - Semantic relevance using related terms and synonyms (LSI keywords).
-//    - Consider modern SEO factors, such as topic clusters, search intent alignment, and potential for featured snippets or "People Also Ask" results.
-
-// 2. **Top Keyword Selection:**
-//    - From the extracted keywords, select the single most relevant keyword based on:
-//      - Highest prominence in the content (e.g., frequency, use in title, H1, or early paragraphs).
-//      - Strong alignment with the page’s core topic and primary user search intent.
-//      - SEO value, balancing specificity (to reduce competition) and search volume potential.
-//    - The top keyword should succinctly represent the page’s primary focus and be actionable for on-page optimization.
-
-// 3. **Output Formatting:**
-//    - Return a valid JSON object with the following structure:
-//      \`\`\`json
-//      {
-//        "keywords": ["keyword1", "keyword2", ..., "keywordN"],
-//        "topKeyword": "best-single-keyword"
-//      }
-//      \`\`\`
-//    - Do not include explanations, additional text, or extraneous formatting.
-//    - All keywords must be in lowercase unless proper nouns or brand names require capitalization.
-//    - Ensure the JSON is valid, clean, and parsable.
-// `;
-
-
-// ======= fine tuned from gemini
+//  fine tuned from gemini
 const getKeySystemInstruction = `You are an expert SEO analyst AI, specializing in identifying high-value keywords from webpage content. Your goal is to extract a set of relevant SEO keywords and pinpoint the single most impactful keyword for optimal search engine ranking.
 
 Follow these instructions meticulously:
@@ -204,34 +46,7 @@ Follow these instructions meticulously:
    - Ensure the JSON is flawlessly formatted, valid, and easily parsable by a machine. Invalid JSON will result in failure.
 `;
 
-
 export async function getKeywords(url) {
-
-    // const prompt = `Extract the top 10 to 15 keywords related to SEO from the content of the webpage at the following URL: ${url}
-      
-    //   I need a concise list of keywords that an SEO expert would consider most important for understanding this page's search relevance. 
-    //   Do not include any extra text before or after the list.
-    //   `;
-  
-    //   try {
-    //     const result = await model.generateContent([prompt]);
-    //     const responseText = result.response.candidates[0].content.parts[0].text;
-
-    //     // Remove the ```json and ``` tags, and then parse the JSON string
-    //     const jsonString = responseText.replace(/```json\n/g, '').replace(/```/g, '');
-    //     try {
-    //         const keywords = JSON.parse(jsonString);
-    //         return keywords;
-    //     } catch (parseError) {
-    //         console.error('Error parsing JSON. Returning raw text:', parseError);
-    //         return responseText; // Return the raw text if JSON parsing fails
-    //     }
-    // } catch (error) {
-    //     console.error('Error during content generation:', error);
-    //     return 'Error during content generation';
-    // }
-
-
     try {
         // 1. Fetch the website content
         const response = await axios.get(url, {
@@ -253,47 +68,16 @@ export async function getKeywords(url) {
             .text();
         const cleanText = text.replace(/\s+/g, ' ').trim(); // Replace multiple spaces with single space
 
-        // const prompt = `Extract the top 15 to 20 keywords related to SEO from the following text content of a webpage: 
-        
-        // ${cleanText}
-
-        // I need a concise list of keywords that an SEO expert would consider most important for understanding this page's search relevance. 
-        // Do not include any extra text before or after the list.
-        // `;
-
-        // 4. Get keywords from the model
-        
-        // const prompt = `Extract the top 15 to 20 SEO-relevant keywords from the following webpage text content:
-
-        //     ${cleanText}
-
-        //     Provide a valid JSON object with the following structure:
-        //     {
-        //     "keywords": ["keyword1", "keyword2", ..., "keywordN"],
-        //     "topKeyword": "best-single-keyword"
-        //     }
-
-        //     - Focus on short-tail and mid-tail keywords (1–3 words), and include long-tail only if highly relevant.
-        //     - Avoid generic words and stop words unless necessary.
-        //     - The "topKeyword" should represent the most relevant and important term based on frequency, placement, and user intent.
-        //     - Output only the raw JSON object, no extra text or explanation.
-        //     `;
         const prompt = `Extract the top 15 to 20 SEO-relevant keywords from the following webpage text content:
             ${cleanText}
             `;
-
-                    
         const responseText = await geminiCall({ modelName: "gemini-2.0-flash", prompt , systemInstruction: getKeySystemInstruction});
 
         // 5. Process the response (same as before, but handle potential errors)
         const jsonString = responseText.replace(/```json\n/g, '').replace(/```/g, '');
-        try {
-            const keywords = JSON.parse(jsonString);
-            return keywords; // Send JSON response
-        } catch (parseError) {
-            console.error('Error parsing JSON. Returning raw text:', parseError);
-            return responseText; // Send raw text, and indicate it was not JSON.
-        }
+        const keywords = JSON.parse(jsonString);
+        return keywords; // Send JSON response
+
     } catch (error) {
         console.error('Error while extracting keywords', error);
         // return 'Error during content generation';
@@ -309,13 +93,9 @@ export async function getCompetitors(url){
         console.log(response);
 
         const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
-        try {
-            const competitorsUrls = JSON.parse(jsonString);
-            return competitorsUrls; // Return the extracted URLs in the response.
-        } catch (parseError) {
-            console.error('Error parsing JSON. Returning raw text:', parseError);
-            return response; // Send raw text, and indicate it was not JSON.
-        }
+        const competitorsUrls = JSON.parse(jsonString);
+        return competitorsUrls; // Return the extracted URLs in the response.
+       
     } catch (error){
         // return 'Error during content generation:', error;
         throw new Error('Error while fetching competitors url', { cause: error }) ; 
@@ -388,7 +168,7 @@ export const generateArticleContent = async (title, keywords, wordCount) => {
     `;
 
     try {
-        const response = await geminiCall({ modelName: "gemini-2.0-flash", prompt });
+        const response = await geminiCall({ modelName: "gemini-2.5-flash", prompt });
         return response; // Return the generated content
     } catch (error) {
         console.error('Error generating article content:', error);

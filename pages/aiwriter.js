@@ -29,8 +29,9 @@ export default function () {
             const articleContent = await generateArticleContent(title, keywords, wordCount);
             setGeneratedContent(articleContent);
         } catch (err) {
-            console.error('Error generating content:', err);
-            setError('Could not generate content: ' + err.message);
+            // console.error('Error generating content:', err);
+            // setError('Could not generate content: ' + err.message);
+            setError("Oops! The service is currently down.");
         } finally {
             setLoading(false);
         }

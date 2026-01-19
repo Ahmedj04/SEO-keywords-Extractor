@@ -54,6 +54,10 @@ export default function Home() {
             // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
             return;
         }
+        
+        setError("Oops! The service is currently down.");
+        // setTimeout(() => setError(null), 2000);
+        return
 
         setLoading(true);
         setError(null);
@@ -141,6 +145,7 @@ export default function Home() {
                 errorMessage = "An error occurred while extracting keywords. Please try again later.";
             }
             setError(errorMessage);
+            // setError("Oops! The service is currently down.");
             // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
 
         } finally {

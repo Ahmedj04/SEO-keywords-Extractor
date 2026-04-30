@@ -1,5 +1,9 @@
 import { Ollama } from "ollama";
 
+export const OLLAMA_FAST_MODEL = "gpt-oss:20b";
+export const OLLAMA_SMART_MODEL = "nemotron-3-super";
+export const OLLAMA_TEMPERATURE = 0.2;
+
 function createClient() {
   if (!process.env.OLLAMA_HOST) {
     throw new Error("OLLAMA_HOST is required.");
@@ -20,7 +24,7 @@ export async function ollamaCall({
   format,
 }) {
   const model =
-    modelName || process.env.OLLAMA_DEFAULT_MODEL;
+    modelName || OLLAMA_FAST_MODEL;
 
   try {
     const ollama = createClient();
@@ -39,7 +43,7 @@ export async function ollamaCall({
       stream: false, // explicitly disable streaming
       ...(format ? { format } : {}),
       options: {
-        temperature: Number(process.env.OLLAMA_TEMPERATURE || 0.2),
+        temperature: Number(OLLAMA_TEMPERATURE),
       },
     });
 

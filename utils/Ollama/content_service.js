@@ -1,10 +1,8 @@
 import axios from 'axios';
 const cheerio = require('cheerio');
 import { ollamaCall } from './ollamaService';
+import { OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL } from './ollamaService';
 
-const KEYWORD_MODEL = process.env.OLLAMA_KEYWORD_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
-const CONTENT_MODEL = process.env.OLLAMA_CONTENT_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
-const RESEARCH_MODEL = process.env.OLLAMA_RESEARCH_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
 
 function extractJson(text) {
     const cleanedText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -79,7 +77,7 @@ export async function getKeywords(url) {
         const prompt = `Extract SEO keywords from the following webpage content:
             ${cleanText}
             `;
-        const responseText = await ollamaCall({ modelName: KEYWORD_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
+        const responseText = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
         
         // 5. Process the response.
         const keywords = extractJson(responseText);
@@ -118,7 +116,7 @@ export async function getCompetitors(url){
     `;
     
     try{
-        const response = await ollamaCall({ modelName: RESEARCH_MODEL, prompt, format: 'json' });
+        const response = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt, format: 'json' });
 
         const competitorsUrls = extractJson(response);
         return competitorsUrls; // Return the extracted URLs in the response.
@@ -160,7 +158,7 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
     `;
 
     try {
-        const response = await ollamaCall({ modelName: CONTENT_MODEL, prompt, format: 'json' });
+        const response = await ollamaCall({ modelName: OLLAMA_FAST_MODEL, prompt, format: 'json' });
         try {
             const ContentSuggestions = extractJson(response);
             return ContentSuggestions;
@@ -194,7 +192,7 @@ export const generateArticleContent = async (title, keywords, wordCount) => {
     `;
 
     try {
-        const response = await ollamaCall({ modelName: CONTENT_MODEL, prompt });
+        const response = await ollamaCall({ modelName: OLLAMA_FAST_MODEL, prompt });
         return response; // Return the generated content
     } catch (error) {
         console.error('Error generating article content:', error);

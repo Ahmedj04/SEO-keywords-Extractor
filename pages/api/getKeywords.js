@@ -1,4 +1,4 @@
-import { getKeywords } from "@/utils/GoogleGemini/content_service";
+import { getKeywords } from "@/utils/Ollama/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         } catch (error) {
             console.log("Error coming from content_service getKeyword function: ",error)
             // res.status(500).json({ error: 'Internal Server Error', errorDetail: error.cause });
-            if (error.cause.code === 'ECONNREFUSED'){
+            if (error.cause?.code === 'ECONNREFUSED' || error.cause?.cause?.code === 'ECONNREFUSED'){
                 res.status(500).json({ error: `Oops! We couldn't connect right now. Please try again in a few moments.` });
             }
             else{

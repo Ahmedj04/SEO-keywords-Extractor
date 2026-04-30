@@ -37,7 +37,22 @@ Just provide:
 - **Styling**: Tailwind CSS 
 - **Deployment**: Vercel  
 - **Backend fetching**: API routes  
-- **AI part**: Google Gemini API
+- **AI part**: Ollama remote models
+
+## Ollama Setup
+
+Point the app at a remote Ollama-compatible API host that serves `gpt-oss:20b`. The app calls `/api/chat` on this host, so set `OLLAMA_HOST` to the base URL only.
+
+```bash
+OLLAMA_HOST=https://your-remote-ollama-host.example.com
+OLLAMA_API_KEY=
+OLLAMA_MODEL=gpt-oss:20b
+OLLAMA_KEYWORD_MODEL=gpt-oss:20b
+OLLAMA_CONTENT_MODEL=gpt-oss:20b
+OLLAMA_TEMPERATURE=0.2
+```
+
+`OLLAMA_API_KEY` is optional and is sent as a Bearer token when your remote provider requires authentication.
 
 ## 🚀 Quick Start
 

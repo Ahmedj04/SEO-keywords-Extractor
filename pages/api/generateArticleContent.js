@@ -1,4 +1,4 @@
-import { generateArticleContent } from "@/utils/GoogleGemini/content_service";
+import { generateArticleContent } from "@/utils/Ollama/content_service";
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         const generatedArticleContent = await generateArticleContent(title, keywords, wordCount);
         res.status(200).json({ content: generatedArticleContent });
     } catch (error) {
-        console.error('Error calling Gemini API for content generation:', error);
+        console.error('Error calling Ollama for content generation:', error);
         // Provide a more user-friendly error message
         res.status(500).json({ error: 'Failed to generate content. Please try again later.' });
     }

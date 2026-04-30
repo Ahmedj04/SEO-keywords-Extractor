@@ -1,4 +1,4 @@
-import { getCompetitors } from "@/utils/GoogleGemini/content_service";
+import { getCompetitors } from "@/utils/Ollama/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
         try {
             const competitorsUrls = await getCompetitors(url);
-            res.status(200).json({ competitorUrls: competitorsUrls }); // Send keywords response
+            res.status(200).json(competitorsUrls); // Send keywords response
         } catch (error) {
             res.status(500).json({ error: 'Internal Server Error' });
         }

@@ -1,49 +1,57 @@
 import axios from 'axios';
 const cheerio = require('cheerio');
-import { geminiCall } from './geminiService';
+import { ollamaCall } from './ollamaService';
 
-//  fine tuned from gemini
-const getKeySystemInstruction = `You are an expert SEO analyst AI, specializing in identifying high-value keywords from webpage content. Your goal is to extract a set of relevant SEO keywords and pinpoint the single most impactful keyword for optimal search engine ranking.
+const KEYWORD_MODEL = process.env.OLLAMA_KEYWORD_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
+const CONTENT_MODEL = process.env.OLLAMA_CONTENT_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
+const RESEARCH_MODEL = process.env.OLLAMA_RESEARCH_MODEL || process.env.OLLAMA_DEFAULT_MODEL;
 
-Follow these instructions meticulously:
+function extractJson(text) {
+    const cleanedText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
 
-1. **Comprehensive Keyword Analysis & Extraction:**
-   - Deeply analyze the provided webpage text, understanding its core themes, arguments, and target audience.
-   - Identify **10-15** of the most relevant SEO keywords and phrases. *Prioritize quality over quantity.*
-   - Focus on keywords that closely match the webpage's primary topic and the likely search queries users would employ to find this content.
-   - **Prioritize keywords with demonstrated search volume potential.**  While you don't have live data, infer potential search volume based on the keyword's specificity and relevance to common user needs.
-   - **Balance short-tail (1-2 words) and mid-tail (3-4 words) keywords.**  Include long-tail keywords (5+ words) ONLY if they are highly specific to the content and clearly address a distinct user query.
-   - **Actively filter out:**
-     -  Stop words (e.g., "the," "a," "in") and filler words.
-     -  Generic terms lacking SEO value (e.g., "more information," "find out more").
-     -  Keywords unrelated to the *core* subject matter.
-     -  Internal navigational terms specific to the website itself.
-   - **Evaluate keyword importance based on:**
-     -  Frequency within the text.
-     -  Placement in critical areas (title, headings, subheadings, meta descriptions, image alt text - *inferring their presence*).
-     -  Contextual relevance and semantic relationship to the main topic.  Consider how well the keyword encapsulates the page's intent.
-     -  **Potential for user intent matching: Does the keyword clearly answer a user question or fulfill a specific need addressed on the page?**
+    try {
+        return JSON.parse(cleanedText);
+    } catch {
+        const objectStart = cleanedText.indexOf('{');
+        const objectEnd = cleanedText.lastIndexOf('}');
+        const arrayStart = cleanedText.indexOf('[');
+        const arrayEnd = cleanedText.lastIndexOf(']');
 
-2. **Strategic Top Keyword Selection:**
-   - From the extracted keyword list, select the *single* most strategic keyword for SEO. Base your decision on the following criteria:
-     - **Relevance:** How accurately does the keyword represent the *primary* topic of the page?
-     - **Search Volume Potential:** Based on your understanding of search trends, which keyword is most likely to be searched by a significant number of users?
-     - **Specificity:** Does the keyword clearly define the page's focus without being overly broad?
-     - **Competitive Landscape (Inferring):** Consider the likely competition for the keyword.  Is it specific enough to avoid competing with excessively broad, high-competition terms?
-     - **User Intent Match:**  Does the keyword best reflect the user's intent when searching for the content on the page?
-   - The top keyword should be the most concise, impactful, and search-engine-friendly representation of the page's content.
+        if (objectStart !== -1 && objectEnd > objectStart) {
+            return JSON.parse(cleanedText.slice(objectStart, objectEnd + 1));
+        }
 
-3. **Precise Output Formatting:**
-   - Return a valid JSON object adhering to the exact structure below:
-     \`\`\`json
-     {
-       "keywords": ["keyword1", "keyword2", ..., "keywordN"],
-       "topKeyword": "best-single-keyword"
-     }
-     \`\`\`
-   - **IMPORTANT:** Provide *only* the JSON object. No introductory text, explanations, disclaimers, or extraneous characters.
-   - All keywords *must* be lowercase, except for proper nouns requiring capitalization.
-   - Ensure the JSON is flawlessly formatted, valid, and easily parsable by a machine. Invalid JSON will result in failure.
+        if (arrayStart !== -1 && arrayEnd > arrayStart) {
+            return JSON.parse(cleanedText.slice(arrayStart, arrayEnd + 1));
+        }
+
+        throw new Error('No valid JSON found in Ollama response');
+    }
+}
+
+// Fine tuned for local Ollama chat models.
+const getKeySystemInstruction = `
+You are an expert SEO analyst.
+
+Analyze webpage content and extract high-quality SEO keywords based on topic relevance and user search intent.
+
+Output STRICT JSON only in this format:
+{
+  "keywords": ["keyword1", "keyword2"],
+  "topKeyword": "best keyword"
+}
+
+Rules:
+- Return 12–18 keywords
+- Keywords must be lowercase (except proper nouns)
+- No duplicates or near-duplicates
+- Focus on meaningful phrases, not single generic words
+- Balance short, medium, and long-tail keywords
+- Ignore stop words, navigation text, and irrelevant content
+- Keywords must reflect real user search intent
+- Select ONE topKeyword that best represents the page's main topic
+
+Do not include explanations or extra text.
 `;
 
 export async function getKeywords(url) {
@@ -68,15 +76,14 @@ export async function getKeywords(url) {
             .text();
         const cleanText = text.replace(/\s+/g, ' ').trim(); // Replace multiple spaces with single space
 
-        const prompt = `Extract the top 15 to 20 SEO-relevant keywords from the following webpage text content:
+        const prompt = `Extract SEO keywords from the following webpage content:
             ${cleanText}
             `;
-        const responseText = await geminiCall({ modelName: "gemini-2.0-flash", prompt , systemInstruction: getKeySystemInstruction});
-
-        // 5. Process the response (same as before, but handle potential errors)
-        const jsonString = responseText.replace(/```json\n/g, '').replace(/```/g, '');
-        const keywords = JSON.parse(jsonString);
-        return keywords; // Send JSON response
+        const responseText = await ollamaCall({ modelName: KEYWORD_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
+        
+        // 5. Process the response.
+        const keywords = extractJson(responseText);
+        return keywords; // Send JSON response  
 
     } catch (error) {
         console.error('Error while extracting keywords', error);
@@ -86,14 +93,34 @@ export async function getKeywords(url) {
 }
 
 export async function getCompetitors(url){
-    const prompt = `Analyze the website at ${url}. Identify its main competitors based on its services, products, target audience, and business model. List at most three competitor website URLs in a JSON array. Do not include any other text or explanations.`;
+    const prompt = `
+        You are an expert market analyst.
+
+        Analyze the website: ${url}
+
+        Identify DIRECT competitors (same product/service and target audience).
+
+        Return STRICT JSON only in this exact format:
+        {
+            "competitorUrls": [
+                "https://example1.com",
+                "https://example2.com",
+                "https://example3.com"
+            ]
+        }
+
+        Rules:
+        - Maximum 3 competitors
+        - Only real, well-known competitors
+        - URLs must be valid homepage URLs (include https://)
+        - No explanations, no extra text, no markdown
+        - Do not include anything except the JSON object
+    `;
     
     try{
-        const response = await geminiCall({ modelName: "gemini-2.5-flash", prompt });
-        console.log(response);
+        const response = await ollamaCall({ modelName: RESEARCH_MODEL, prompt, format: 'json' });
 
-        const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
-        const competitorsUrls = JSON.parse(jsonString);
+        const competitorsUrls = extractJson(response);
         return competitorsUrls; // Return the extracted URLs in the response.
        
     } catch (error){
@@ -133,10 +160,9 @@ export const generateContentSuggestions = async (metadata, gapKeywords) => {
     `;
 
     try {
-        const response = await geminiCall({ modelName: "gemini-2.0-flash", prompt });
-        const jsonString = response.replace(/```json\n/g, '').replace(/```/g, '');
+        const response = await ollamaCall({ modelName: CONTENT_MODEL, prompt, format: 'json' });
         try {
-            const ContentSuggestions = JSON.parse(jsonString);
+            const ContentSuggestions = extractJson(response);
             return ContentSuggestions;
         } catch (parseError) {
             console.error('Error parsing JSON. Returning raw text:', parseError);
@@ -168,7 +194,7 @@ export const generateArticleContent = async (title, keywords, wordCount) => {
     `;
 
     try {
-        const response = await geminiCall({ modelName: "gemini-2.5-flash", prompt });
+        const response = await ollamaCall({ modelName: CONTENT_MODEL, prompt });
         return response; // Return the generated content
     } catch (error) {
         console.error('Error generating article content:', error);

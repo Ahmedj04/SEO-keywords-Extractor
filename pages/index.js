@@ -51,13 +51,14 @@ export default function Home() {
     const handleGetKeywords = async () => {
         if (!url) {
             setError('Please enter a URL.');
-            // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
+            setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
             return;
         }
         
-        setError("Oops! The service is currently down.");
-        // setTimeout(() => setError(null), 2000);
-        return
+        // setError("Oops! The service is currently down.");
+        // setTimeout(() => setError(null), 3000);
+        // return
+        
 
         setLoading(true);
         setError(null);

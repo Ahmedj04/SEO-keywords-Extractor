@@ -1,4 +1,4 @@
-import { getCompetitors } from "@/utils/Ollama/content_service";
+import { getCompetitors } from "@/Services/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {

@@ -1,4 +1,4 @@
-import { generateContentSuggestions } from "@/utils/Ollama/content_service";
+import { generateContentSuggestions } from "@/Services/content_service";
 
 export default async function handler(req, res) {
     try {

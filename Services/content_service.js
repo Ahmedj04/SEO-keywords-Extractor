@@ -80,7 +80,8 @@ export async function getKeywords(url) {
         const responseText = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
         
         // 5. Process the response.
-        const keywords = extractJson(responseText);
+        // const keywords = extractJson(responseText);
+        const keywords = JSON.parse(responseText);;
         return keywords; // Send JSON response  
 
     } catch (error) {

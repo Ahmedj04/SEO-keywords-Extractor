@@ -1,4 +1,4 @@
-import { getKeywords } from "@/utils/Ollama/content_service";
+import { getKeywords } from "@/Services/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {

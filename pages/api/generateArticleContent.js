@@ -1,4 +1,4 @@
-import { generateArticleContent } from "@/Services/content_service";
+import { generateArticleContent } from "@/services/content_service";
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {

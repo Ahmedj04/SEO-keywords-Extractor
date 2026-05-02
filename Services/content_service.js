@@ -1,8 +1,6 @@
 import axios from 'axios';
 const cheerio = require('cheerio');
-import { ollamaCall } from './ollamaService';
-import { OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL } from './ollamaService';
-
+import { ollamaCall, OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL, geminiCall , GEMINI_FAST_MODEL } from '../llm';
 
 function extractJson(text) {
     const cleanedText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -78,10 +76,10 @@ export async function getKeywords(url) {
             ${cleanText}
             `;
         const responseText = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
+        // const responseText = await geminiCall({ modelName: GEMINI_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction});
         
         // 5. Process the response.
-        // const keywords = extractJson(responseText);
-        const keywords = JSON.parse(responseText);;
+        const keywords = extractJson(responseText);
         return keywords; // Send JSON response  
 
     } catch (error) {
@@ -118,6 +116,7 @@ export async function getCompetitors(url){
     
     try{
         const response = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt, format: 'json' });
+        // const response = await geminiCall({ modelName: GEMINI_FAST_MODEL, prompt});
 
         const competitorsUrls = extractJson(response);
         return competitorsUrls; // Return the extracted URLs in the response.
@@ -128,8 +127,6 @@ export async function getCompetitors(url){
     }
 }
 
-// Given the following HTML content of a webpage:
-//  Use LLM to generate content optimization suggestions
 export const generateContentSuggestions = async (metadata, gapKeywords) => {
     const prompt = `
         Given the MetaData content of a webpage:

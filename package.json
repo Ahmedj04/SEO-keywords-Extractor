@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@langchain/core": "^1.1.43",
+    "@langchain/google-genai": "^2.1.30",
     "@langchain/ollama": "^1.2.7",
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",

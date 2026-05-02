@@ -1,0 +1,2 @@
+export { ollamaCall, OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL } from "./ollama";
+export { geminiCall , GEMINI_FAST_MODEL } from "./gemini";

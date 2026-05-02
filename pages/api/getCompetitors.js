@@ -1,4 +1,4 @@
-import { getCompetitors } from "@/Services/content_service";
+import { getCompetitors } from "@/services/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {

@@ -1,4 +1,4 @@
-import { generateContentSuggestions } from "@/Services/content_service";
+import { generateContentSuggestions } from "@/services/content_service";
 
 export default async function handler(req, res) {
     try {

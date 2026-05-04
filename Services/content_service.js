@@ -1,56 +1,33 @@
 import axios from 'axios';
 const cheerio = require('cheerio');
-import { ollamaCall, OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL, geminiCall , GEMINI_FAST_MODEL } from '../llm';
+import { extractRelevantContent, extractJson } from '../utils/parserUtils';
+import { ollamaCall, OLLAMA_FAST_MODEL, geminiCall , GEMINI_FAST_MODEL, groqCall, GROQ_FAST_MODEL } from '../llm';
 
-function extractJson(text) {
-    const cleanedText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-
-    try {
-        return JSON.parse(cleanedText);
-    } catch {
-        const objectStart = cleanedText.indexOf('{');
-        const objectEnd = cleanedText.lastIndexOf('}');
-        const arrayStart = cleanedText.indexOf('[');
-        const arrayEnd = cleanedText.lastIndexOf(']');
-
-        if (objectStart !== -1 && objectEnd > objectStart) {
-            return JSON.parse(cleanedText.slice(objectStart, objectEnd + 1));
-        }
-
-        if (arrayStart !== -1 && arrayEnd > arrayStart) {
-            return JSON.parse(cleanedText.slice(arrayStart, arrayEnd + 1));
-        }
-
-        throw new Error('No valid JSON found in Ollama response');
-    }
-}
-
-// Fine tuned for local Ollama chat models.
-const getKeySystemInstruction = `
-You are an expert SEO analyst.
-
-Analyze webpage content and extract high-quality SEO keywords based on topic relevance and user search intent.
-
-Output STRICT JSON only in this format:
-{
-  "keywords": ["keyword1", "keyword2"],
-  "topKeyword": "best keyword"
-}
-
-Rules:
-- Return 12–18 keywords
-- Keywords must be lowercase (except proper nouns)
-- No duplicates or near-duplicates
-- Focus on meaningful phrases, not single generic words
-- Balance short, medium, and long-tail keywords
-- Ignore stop words, navigation text, and irrelevant content
-- Keywords must reflect real user search intent
-- Select ONE topKeyword that best represents the page's main topic
-
-Do not include explanations or extra text.
-`;
 
 export async function getKeywords(url) {
+    const getKeySystemInstruction = `
+        You are an expert SEO analyst.
+
+        Analyze webpage content and extract high-quality SEO keywords based on topic relevance and user search intent.
+
+        Output STRICT JSON only in this format:
+        {
+        "keywords": ["keyword1", "keyword2"],
+        "topKeyword": "best keyword"
+        }
+
+        Rules:
+        - Return 12–18 keywords
+        - Keywords must be lowercase (except proper nouns)
+        - No duplicates or near-duplicates
+        - Focus on meaningful phrases, not single generic words
+        - Balance short, medium, and long-tail keywords
+        - Ignore stop words, navigation text, and irrelevant content
+        - Keywords must reflect real user search intent
+        - Select ONE topKeyword that best represents the page's main topic
+
+        Do not include explanations or extra text.
+    `;
     try {
         // 1. Fetch the website content
         const response = await axios.get(url, {
@@ -62,23 +39,13 @@ export async function getKeywords(url) {
             }
         });
 
-        const html = response.data;
+        const $ = cheerio.load(response.data);
+        const relevantContent = extractRelevantContent($);
+        const prompt = `Extract SEO keywords from this webpage:\n${relevantContent}`;
 
-        // 2. Extract the text content.  This is crucial for feeding clean text to the model.
-        const $ = cheerio.load(html);
-        // Remove script and style tags, and get the text.
-        const text = $('body').clone()    
-            .find('script, style').remove().end()
-            .text();
-        const cleanText = text.replace(/\s+/g, ' ').trim(); // Replace multiple spaces with single space
-
-        const prompt = `Extract SEO keywords from the following webpage content:
-            ${cleanText}
-            `;
-        const responseText = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
-        // const responseText = await geminiCall({ modelName: GEMINI_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction});
+        // const responseText = await ollamaCall({ modelName: OLLAMA_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
+        const responseText = await groqCall({ modelName: GROQ_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction});
         
-        // 5. Process the response.
         const keywords = extractJson(responseText);
         return keywords; // Send JSON response  
 
@@ -115,8 +82,9 @@ export async function getCompetitors(url){
     `;
     
     try{
-        const response = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt, format: 'json' });
-        // const response = await geminiCall({ modelName: GEMINI_FAST_MODEL, prompt});
+        // const response = await ollamaCall({ modelName: OLLAMA_SMART_MODEL, prompt, format: 'json' });
+        const response = await geminiCall({ modelName: GEMINI_FAST_MODEL, prompt});
+        // const response = await groqCall({ modelName: "llama-3.3-70b-versatile", prompt});
 
         const competitorsUrls = extractJson(response);
         return competitorsUrls; // Return the extracted URLs in the response.

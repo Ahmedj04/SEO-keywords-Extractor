@@ -1,7 +1,8 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-export const GEMINI_FAST_MODEL = "gemini-2.5-flash-lite";
+// export const GEMINI_FAST_MODEL = "gemini-2.5-flash-lite";
+export const GEMINI_FAST_MODEL = "gemini-3-flash-preview";
 export const GEMINI_TEMPERATURE = 0.2;
 
 function createClient(modelName) {

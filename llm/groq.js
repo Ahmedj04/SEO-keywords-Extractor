@@ -4,11 +4,12 @@ import Bottleneck from "bottleneck";
 
 export const GROQ_FAST_MODEL = "llama-3.3-70b-versatile";
 // export const GROQ_FAST_MODEL = "llama-3.1-8b-instant";
+export const GROQ_SMART_MODEL = "groq/compound-mini";
 export const GROQ_TEMPERATURE =  0.2;
 
 const limiter = new Bottleneck({
-  reservoir: 8, // max 8 jobs at a time
-  reservoirRefreshAmount: 8,  // reset to 8 every interval
+  reservoir: 10, // max 10 jobs at a time
+  reservoirRefreshAmount: 10,  // reset to 10 every interval
   reservoirRefreshInterval: 60 * 1000,  // refresh every minute
   maxConcurrent: 1,  // one at a time to avoid burst spikes
   // minTime: 15000,

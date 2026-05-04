@@ -1,4 +1,4 @@
-import { getKeywords } from "@/services/content_service";
+import { getKeywords } from "../../services/content_service";
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {

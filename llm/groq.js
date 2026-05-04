@@ -1,30 +1,45 @@
 import { ChatGroq } from "@langchain/groq";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import Bottleneck from "bottleneck";
 
-export const GROQ_FAST_MODEL = "llama-3.3-70b-versatile";
+// export const GROQ_FAST_MODEL = "llama-3.3-70b-versatile";
+export const GROQ_FAST_MODEL = "llama-3.1-8b-instant";
 export const GROQ_TEMPERATURE =  0.2;
 
+const limiter = new Bottleneck({
+  reservoir: 4, 
+  reservoirRefreshAmount: 4,
+  reservoirRefreshInterval: 60 * 1000,
+  maxConcurrent: 1,
+  // minTime: 15000,
+})
+
 function createClient(modelName) {
-  if (!process.env.GROQ_API_KEY) throw new Error("GROQ_API_KEY is required.");
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY is required.");
 
   return new ChatGroq({
     model: modelName,
     temperature: GROQ_TEMPERATURE,
-    apiKey: process.env.GROQ_API_KEY,
+    apiKey: apiKey,
   });
 }
 
-export async function groqCall({ prompt, systemInstruction, modelName }) {
+async function groqCallRaw({ prompt, systemInstruction, modelName }) {
   const model = createClient(modelName);
 
   const messages = [];
   if (systemInstruction) messages.push(new SystemMessage(systemInstruction));
   messages.push(new HumanMessage(prompt));
+  
+  const response = await model.invoke(messages);
+  const content = response.content;
+  return typeof content === "string" ? content : JSON.stringify(content); 
+}
 
-  try {
-    const response = await model.invoke(messages);
-    const content = response.content;
-    return typeof content === "string" ? content : JSON.stringify(content);
+export async function groqCall(params) {
+  try{
+    return await limiter.schedule(() => groqCallRaw(params))
   } catch (error) {
     console.error("Error calling Groq:", error);
     throw new Error("Error calling Groq", { cause: error });

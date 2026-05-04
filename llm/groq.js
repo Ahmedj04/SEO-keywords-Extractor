@@ -2,15 +2,15 @@ import { ChatGroq } from "@langchain/groq";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import Bottleneck from "bottleneck";
 
-// export const GROQ_FAST_MODEL = "llama-3.3-70b-versatile";
-export const GROQ_FAST_MODEL = "llama-3.1-8b-instant";
+export const GROQ_FAST_MODEL = "llama-3.3-70b-versatile";
+// export const GROQ_FAST_MODEL = "llama-3.1-8b-instant";
 export const GROQ_TEMPERATURE =  0.2;
 
 const limiter = new Bottleneck({
-  reservoir: 4, 
-  reservoirRefreshAmount: 4,
-  reservoirRefreshInterval: 60 * 1000,
-  maxConcurrent: 1,
+  reservoir: 8, // max 4 jobs at a time
+  reservoirRefreshAmount: 8,  // reset to 4 every interval
+  reservoirRefreshInterval: 60 * 1000,  // refresh every minute
+  maxConcurrent: 1,  // one at a time to avoid burst spikes
   // minTime: 15000,
 })
 

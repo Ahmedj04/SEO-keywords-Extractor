@@ -135,14 +135,20 @@ export default function Home() {
             // setContentSuggestions(suggestions);
 
         } catch (error) {
-            let errorMessage;
-            if (error.response?.data?.error) {
-                errorMessage = error.response.data.error;
-            } else if (error.message) {
-                errorMessage = error.message;
-            } else {
-                errorMessage = "An error occurred while extracting keywords. Please try again later.";
+            let errorMessage = "Something went wrong. Please try again.";
+            // 1. Vercel timeout / network failure
+            if (error.name === "AbortError" || error.message?.includes("timeout") || error.message?.includes("Failed to fetch") || !error.response ) {
+                errorMessage = "The request took too long and timed out. Please try again.";
             }
+            // 2. Server returned structured error
+            else if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+            }
+            // 3. Fallback 
+            else if (error.message) {
+                errorMessage = error.message;   
+            }
+
             setError(errorMessage);
             // setError("Oops! The service is currently down.");
             // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds

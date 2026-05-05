@@ -1,8 +1,6 @@
 import axios from 'axios';
-const cheerio = require('cheerio');
 import { extractRelevantContent, extractJson } from '../utils/parserUtils';
-import { ollamaCall, OLLAMA_FAST_MODEL, geminiCall , GEMINI_FAST_MODEL, groqCall, GROQ_FAST_MODEL, GROQ_SMART_MODEL } from '../llm';
-
+import { ollamaCall, OLLAMA_FAST_MODEL, OLLAMA_SMART_MODEL, geminiCall , GEMINI_FAST_MODEL, groqCall, GROQ_FAST_MODEL, GROQ_SMART_MODEL } from '../llm';
 
 export async function getKeywords(url) {
     const getKeySystemInstruction = `
@@ -29,7 +27,6 @@ export async function getKeywords(url) {
         Do not include explanations or extra text.
     `;
     try {
-        // 1. Fetch the website content
         const response = await axios.get(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
@@ -38,16 +35,14 @@ export async function getKeywords(url) {
                 'Cache-Control': 'max-age=0',
             }
         });
-
-        const $ = cheerio.load(response.data);
-        const relevantContent = extractRelevantContent($);
+        const relevantContent = extractRelevantContent(response.data);
         const prompt = `Extract SEO keywords from this webpage:\n${relevantContent}`;
 
         // const responseText = await ollamaCall({ modelName: OLLAMA_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction, format: 'json'});
         const responseText = await groqCall({ modelName: GROQ_FAST_MODEL, prompt , systemInstruction: getKeySystemInstruction});
         
         const keywords = extractJson(responseText);
-        return keywords; // Send JSON response  
+        return keywords; 
 
     } catch (error) {
         console.error('Error while extracting keywords', error);

@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText, Zap } from 'lucide-react';
 import { extractKeywords } from '@/utils/keywordUtils';
 import { getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
-import axios from 'axios';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { fetchHtml } from '@/utils/fetchUtils';
 
 export default function Home() {
     const [url, setUrl] = useState("");
@@ -85,23 +85,21 @@ export default function Home() {
                 formattedUrl = 'https://' + formattedUrl;
             }
 
-            const metadataResponse = await axios.get(`/api/getPageMetadata?url=${encodeURIComponent(formattedUrl)}`);
+            const metadataResponse = await fetchHtml(formattedUrl);
 
             if (metadataResponse.status !== 200) return;
 
             setBtnStatus('Extracting Keywords...')
-            // Fetch keywords from the current page
             const currentPageKeywords = await extractKeywords(formattedUrl);
 
             setBtnStatus('Analyzing Competitors...')
-
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
             setBtnStatus('Extracting Keywords...')
             // Extract keywords from the top 3 pages
             const topPageKeywords = await Promise.all(
                 topPageUrls.map(async (pageUrl) => {
-                    const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
+                    const res = await fetchHtml(pageUrl);
                     if (res.status === 200) {
                         const competitorKeywords = await extractKeywords(pageUrl);
                         if (competitorKeywords.keywords) {

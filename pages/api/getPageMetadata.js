@@ -1,5 +1,4 @@
 import axios from 'axios';
-const cheerio = require('cheerio');
 
 export default async function handler(req, res) {
     const { url } = req.query;
@@ -22,17 +21,9 @@ export default async function handler(req, res) {
                 'Cache-Control': 'max-age=0',
             },
         });
+        
         const html = response.data;
-
-        // Use cheerio to parse the HTML and extract the title and description
-        const $ = cheerio.load(html);
-        const title = $('title').text().trim();
-        const description = $('meta[name="description"]').attr('content')?.trim() || '';
-        const bodyText = $('body').text().replace(/\s+/g, ' ').trim().toLowerCase();
-        const paragraphs = $('p').toArray().map(el => $(el).text().trim());
-        const headings = $('h1, h2, h3').toArray().map(el => $(el).text().trim());
-
-        res.status(200).json({ title, description, bodyText, paragraphs, headings });
+        res.status(200).json(html);
     } catch (error) {
         // console.error('Error fetching or parsing the page:', error);
         // res.status(500).json({ error: `Failed to fetch metadata: ${error.message}` });
@@ -43,20 +34,5 @@ export default async function handler(req, res) {
             // res.status(500).json({ error: `Failed to fetch metadata: ${error.message}` });
             res.status(500).json({ error: `The website is not reachable. Please check the URL and try again.`});
         }
-
-        // if (error.response) {
-        //     // The request was made and the server responded with a status code
-        //     // that falls out of the range of 2xx
-        //     res.status(error.response.status).json({
-        //         error: `Failed to fetch metadata: Server responded with ${error.response.status}`,
-        //         details: error.response.data, // Optionally include response data for debugging
-        //     });
-        // } else if (error.request) {
-        //     // The request was made but no response was received
-        //     res.status(500).json({ error: 'Failed to fetch metadata: No response received from the server' });
-        // } else {
-        //     // Something happened in setting up the request that triggered an Error
-        //     res.status(500).json({ error: `Failed to fetch metadata: ${error.message}` });
-        // }
     }
 }

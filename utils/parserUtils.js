@@ -1,4 +1,7 @@
-export function extractRelevantContent($) {
+const cheerio = require('cheerio');
+
+export function extractRelevantContent(metadata) {
+   const $ = cheerio.load(metadata);
   // 1. Remove ALL noise elements first
   $('script, style, nav, footer, header, aside, iframe, noscript, ' +
     '.cookie-banner, .ads, .sidebar, [aria-hidden="true"]').remove();

@@ -1,285 +1,432 @@
-import React, { useState } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, FileText, Lightbulb, PenTool, ClipboardCheck, Copy, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, ClipboardCheck, Copy, FileText, Lightbulb, Loader2, PenTool, Sparkles } from 'lucide-react';
 import { generateArticleContent } from '@/utils/seoUtils';
 
-export default function () {
+const wordCountOptions = [100, 300, 800, 1000];
+
+const styleLabels = {
+    100: 'Short',
+    300: 'Concise',
+    800: 'Detailed',
+    1000: 'Comprehensive',
+};
+
+export default function AIWriter() {
     const [title, setTitle] = useState('');
-    const [keywords, setKeywords] = useState(''); // Comma-separated keywords
+    const [keywords, setKeywords] = useState('');
     const [generatedContent, setGeneratedContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [copyStatus, setCopyStatus] = useState(false); // State for copy feedback
-    const wordCountOptions = [100, 300, 800, 1000];
-    const [wordCount, setWordCount] = useState(wordCountOptions[1]); // New state for word count, default to 200
+    const [copyStatus, setCopyStatus] = useState(false);
+    const [wordCount, setWordCount] = useState(wordCountOptions[1]);
 
     const handleGenerateContent = async () => {
         if (!title || !keywords) {
             setError('Please provide both a title and keywords.');
             return;
         }
-
         setLoading(true);
         setError('');
         setGeneratedContent('');
-
         try {
             const articleContent = await generateArticleContent(title, keywords, wordCount);
             setGeneratedContent(articleContent);
         } catch (err) {
-            // console.error('Error generating content:', err);
-            // setError('Could not generate content: ' + err.message);
-            setError("Oops! The service is currently down.");
+            setError('Oops! The service is currently down.');
         } finally {
             setLoading(false);
         }
     };
 
     const handleCopyContent = () => {
-        // Use document.execCommand('copy') as navigator.clipboard.writeText() may not work in iframes
         const textArea = document.createElement('textarea');
         textArea.value = generatedContent;
         document.body.appendChild(textArea);
         textArea.select();
         try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                setCopyStatus(true);
-            } else {
-                setCopyStatus(false);
-            }
+            setCopyStatus(document.execCommand('copy'));
         } catch (err) {
             setCopyStatus(false);
-            console.error('Copy command failed:', err);
         }
         document.body.removeChild(textArea);
-
-        // Clear feedback after a short delay
-        setTimeout(() => {
-            setCopyStatus(false);
-        }, 2000);
+        setTimeout(() => setCopyStatus(false), 2000);
     };
 
-    // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: {
-                delayChildren: 0.3,
-                staggerChildren: 0.15,
-            },
+            transition: { delayChildren: 0.15, staggerChildren: 0.12 },
         },
     };
 
     const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-        },
+        hidden: { y: 18, opacity: 0 },
+        visible: { y: 0, opacity: 1 },
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8">
-
+        <div className="relative min-h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
             <Header />
 
-            <div className="max-w-4xl mx-auto py-16 pxs-4 sm:px-6 lg:px-8">
-                <motion.div
-                    className="bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl py-6 px-3 md:px-6 space-y-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h2 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-6 flex items-center justify-center gap-3">
-                        <Sparkles className="h-8 w-8 text-yellow-300" /> AI Writer
-                    </h2>
-                    <p className="text-gray-400 text-base text-center">
-                        Create SEO-optimized content effortlessly. Share your topic and keywords, and our AI will simplify your content creation process.
-                    </p>
+            <main className="px-4 sm:px-8">
+                <section className="relative mx-auto grid max-w-7xl gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:py-24">
+                    {/* Decorative elements */}
+                    <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" />
+                    <div className="pointer-events-none absolute -right-40 top-0 h-96 w-96 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #2ea870 0%, transparent 70%)' }} />
 
-                    {/* Input Fields */}
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="content-title" className="block text-gray-300 text-sm font-semibold mb-2">
-                                Content Title/Topic:
-                            </label>
-                            <input
-                                type="text"
-                                id="content-title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="E.g., The Future of AI in SEO"
-                                className="w-full bg-black/30 text-white border-purple-500/20 placeholder:text-gray-500 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                    {/* Left: Info panel */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative space-y-8 lg:sticky lg:top-28"
+                    >
+                        <div
+                            className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+                            style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--accent)' }}
+                        >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            AI content assistant
                         </div>
 
                         <div>
-                            <label htmlFor="content-keywords" className="block text-gray-300 text-sm font-semibold mb-2">
-                                Keywords (comma-separated):
-                            </label>
-                            <textarea
-                                id="content-keywords"
-                                value={keywords}
-                                onChange={(e) => setKeywords(e.target.value)}
-                                placeholder="E.g., AI, SEO, machine learning, content optimization"
-                                rows="3"
-                                className="w-full bg-black/30 text-white border-purple-500/20 placeholder:text-gray-500 rounded-md py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
-                            ></textarea>
+                            <h1
+                                className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl"
+                                style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--foreground)' }}
+                            >
+                                Turn keyword research into a draft{' '}
+                                <span className="italic" style={{ color: 'var(--accent)' }}>faster.</span>
+                            </h1>
+                            <p className="mt-5 text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                                Add a topic, paste your target keywords, choose a length, and generate SEO-friendly content for your next article or landing page.
+                            </p>
                         </div>
 
-                        <div>
-                            <label className="block text-gray-300 text-sm font-semibold mb-2">
-                                Content Style:
-                            </label>
-                            <div className="flex justify-center flex-wrap gap-3 py-2">
-                                {wordCountOptions.map((count) => (
-                                    (<button
-                                        key={count}
-                                        onClick={() => setWordCount(count)}
-                                        className={`
-                                                    px-5 py-2 rounded-full border
-                                                    text-sm font-medium
-                                                    transition-all duration-200 ease-in-out
-                                                    ${wordCount === count
-                                                ? 'bg-purple-600 border-purple-600 text-white shadow-lg'
-                                                : 'bg-black/20 border-purple-500/20 text-gray-300 hover:bg-purple-500/10 hover:border-purple-500/30'
-                                            }
-                                        `}
-                                    >
-                                        {count <= 200 ? 'Short & Sweet' :
-                                            count <= 500 ? 'Concise & Clear' :
-                                                count <= 800 ? 'In-Depth & Detailed' :
-                                                    'Comprehensive & Thorough'}
-                                    </button>
-                                    )
-                                ))}
+                        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                            {[
+                                ['Brief-ready', 'Start from a focused title and target terms.'],
+                                ['Length control', 'Pick the depth that matches your content plan.'],
+                                ['Easy copy', 'Move the generated content into your editor.'],
+                            ].map(([featureTitle, description]) => (
+                                <div
+                                    key={featureTitle}
+                                    className="rounded-2xl border p-4"
+                                    style={{
+                                        borderColor: 'var(--border)',
+                                        background: 'var(--surface)',
+                                        boxShadow: 'var(--shadow-sm)',
+                                    }}
+                                >
+                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{featureTitle}</h3>
+                                    <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+
+                    {/* Right: Writer workspace */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 32 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative rounded-2xl border p-5 sm:p-7"
+                        style={{
+                            borderColor: 'var(--border)',
+                            background: 'var(--surface)',
+                            boxShadow: 'var(--shadow-xl)',
+                        }}
+                    >
+                        <div className="mb-6 flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                                    Writer workspace
+                                </p>
+                                <h2 className="mt-1 text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+                                    Generate content
+                                </h2>
+                            </div>
+                            <div
+                                className="grid h-11 w-11 place-items-center rounded-xl"
+                                style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+                            >
+                                <FileText className="h-5 w-5" />
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleGenerateContent}
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semiboldss py-3 rounded-md shadow-lg
-                        hover:from-purple-600 hover:to-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
-                        flex items-center justify-center gap-2"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin h-5 w-5" /> Generating...
-                                </>
-                            ) : (
-                                <>
-                                    <FileText className="h-5 w-5" /> Generate Content
-                                </>
+                        <div className="space-y-5">
+                            <div>
+                                <label
+                                    htmlFor="content-title"
+                                    className="mb-2 block text-sm font-medium"
+                                    style={{ color: 'var(--text-secondary)' }}
+                                >
+                                    Content title or topic
+                                </label>
+                                <input
+                                    type="text"
+                                    id="content-title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="The future of AI in SEO"
+                                    className="h-12 w-full rounded-xl border px-4 text-sm outline-none transition-all"
+                                    style={{
+                                        borderColor: 'var(--border)',
+                                        background: 'var(--surface-2)',
+                                        color: 'var(--foreground)',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = 'var(--accent)';
+                                        e.target.style.background = 'var(--surface)';
+                                        e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = 'var(--border)';
+                                        e.target.style.background = 'var(--surface-2)';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="content-keywords"
+                                    className="mb-2 block text-sm font-medium"
+                                    style={{ color: 'var(--text-secondary)' }}
+                                >
+                                    Keywords
+                                </label>
+                                <textarea
+                                    id="content-keywords"
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="AI, SEO, machine learning, content optimization"
+                                    rows="4"
+                                    className="w-full resize-y rounded-xl border px-4 py-3 text-sm outline-none transition-all"
+                                    style={{
+                                        borderColor: 'var(--border)',
+                                        background: 'var(--surface-2)',
+                                        color: 'var(--foreground)',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = 'var(--accent)';
+                                        e.target.style.background = 'var(--surface)';
+                                        e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = 'var(--border)';
+                                        e.target.style.background = 'var(--surface-2)';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                                    Content length
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                    {wordCountOptions.map((count) => (
+                                        <button
+                                            key={count}
+                                            onClick={() => setWordCount(count)}
+                                            className="rounded-xl border py-3 px-3 text-sm font-medium transition-all duration-200"
+                                            style={
+                                                wordCount === count
+                                                    ? {
+                                                        borderColor: 'var(--accent)',
+                                                        background: 'var(--foreground)',
+                                                        color: 'var(--background)',
+                                                        boxShadow: 'var(--shadow-md)',
+                                                    }
+                                                    : {
+                                                        borderColor: 'var(--border)',
+                                                        background: 'var(--surface-2)',
+                                                        color: 'var(--text-secondary)',
+                                                    }
+                                            }
+                                        >
+                                            <span className="block font-semibold">{styleLabels[count]}</span>
+                                            <span className="block text-xs opacity-60">{count}w</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleGenerateContent}
+                                disabled={loading}
+                                className="flex h-14 w-full items-center justify-center gap-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+                                style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+                                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'var(--accent)'; }}
+                                onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = 'var(--foreground)'; }}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="h-4 w-4" />
+                                        Generate Content
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        <AnimatePresence>
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -8 }}
+                                    className="mt-4 rounded-xl border p-4 text-sm font-medium"
+                                    style={{ borderColor: '#fca5a5', background: '#fef2f2', color: '#dc2626' }}
+                                >
+                                    {error}
+                                </motion.div>
                             )}
-                        </button>
-                    </div>
+                        </AnimatePresence>
 
-                    {/* Error Message */}
-                    <AnimatePresence>
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="bg-red-500/10 text-red-400 border border-red-500/30 p-4 rounded-md mt-4"
-                            >
-                                {error}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Generated Content Display */}
-                    <AnimatePresence mode="wait">
-                        {generatedContent && (
-                            <motion.div
-                                key="content"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ duration: 0.3 }}
-                                // className="bg-black/30 border border-gray-700 rounded-xl p-6 mt-6 space-y-4 shadow-inner"
-                                className=" py-6 px-3 md:px-6 mt-6 space-y-4 shadow-inner"
-                            >
-                                <div className='flex items-center justify-between'>
-                                    <h2 className='text-3xl capitalize'>{title}</h2>
-                                    <div className="flex items-center gap-2">
+                        <AnimatePresence mode="wait">
+                            {generatedContent && (
+                                <motion.div
+                                    key="content"
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.98 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="mt-6 rounded-2xl border p-5"
+                                    style={{ borderColor: 'var(--border)', background: 'var(--surface-2)' }}
+                                >
+                                    <div
+                                        className="mb-4 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between"
+                                        style={{ borderColor: 'var(--border)' }}
+                                    >
+                                        <h2
+                                            className="min-w-0 text-xl font-bold capitalize"
+                                            style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--foreground)' }}
+                                        >
+                                            {title}
+                                        </h2>
                                         <button
                                             onClick={handleCopyContent}
                                             title="Copy to clipboard"
-                                            className='cursor-pointer'
+                                            className="inline-flex h-9 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-all"
+                                            style={{
+                                                borderColor: 'var(--border)',
+                                                background: 'var(--surface)',
+                                                color: 'var(--text-secondary)',
+                                            }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                                         >
-                                            {copyStatus ? <div className='flex items-center gap-1'> <Check className="h-4 w-4" /> <span className='text-[12px]'>Copied</span> </div> : <Copy className="h-4 w-4" />}
-
+                                            {copyStatus ? (
+                                                <>
+                                                    <Check className="h-3.5 w-3.5" />
+                                                    Copied
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="h-3.5 w-3.5" />
+                                                    Copy
+                                                </>
+                                            )}
                                         </button>
                                     </div>
+                                    <div
+                                        className="whitespace-pre-wrap text-sm leading-8"
+                                        style={{ color: 'var(--text-secondary)' }}
+                                    >
+                                        {generatedContent}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                </section>
+
+                {/* How it works */}
+                <motion.section
+                    id="ai-writer-how-it-works"
+                    className="mx-auto max-w-7xl py-20"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <div className="mx-auto max-w-2xl text-center">
+                        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                            Workflow
+                        </p>
+                        <h2
+                            className="mt-2 text-4xl font-bold"
+                            style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--foreground)' }}
+                        >
+                            How the AI Writer works
+                        </h2>
+                        <p className="mt-4 text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                            A simple three-step path from content idea to usable first draft.
+                        </p>
+                    </div>
+
+                    <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+                        {[
+                            [PenTool, '01', '1. Input your idea', 'Provide the content title or topic and the keywords you want to include.'],
+                            [Sparkles, '02', '2. Generate a draft', 'The AI processes your inputs and writes a coherent piece around them.'],
+                            [ClipboardCheck, '03', '3. Review and refine', 'Copy the output, edit it, and shape it for your audience.'],
+                        ].map(([Icon, step, stepTitle, description]) => (
+                            <motion.div
+                                key={stepTitle}
+                                className="rounded-2xl border p-6"
+                                style={{
+                                    borderColor: 'var(--border)',
+                                    background: 'var(--surface)',
+                                    boxShadow: 'var(--shadow-sm)',
+                                }}
+                                variants={itemVariants}
+                            >
+                                <div className="mb-4 flex items-center justify-between">
+                                    <div
+                                        className="grid h-10 w-10 place-items-center rounded-xl"
+                                        style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                    </div>
+                                    <span
+                                        className="text-3xl font-bold"
+                                        style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--border-strong)' }}
+                                    >
+                                        {step}
+                                    </span>
                                 </div>
-                                <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                    {generatedContent}
-                                </div>
+                                <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>{stepTitle}</h3>
+                                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{description}</p>
                             </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
-            </div>
+                        ))}
+                    </div>
 
-            {/* How It Works Section */}
-            <motion.section
-                id="ai-writer-how-it-works"
-                // className="max-w-6xl mx-auto bg-gradient-to-br from-gray-800/50 to-black/50 border border-purple-500/30 rounded-2xl shadow-xl p-6 space-y-6"
-                className="max-w-6xl mx-auto  p-6 space-y-6"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-            >
-                <h2 className="text-2xl text-white font-bold text-center bg-clip-text bg-gradient-to-r mb-6 flex items-center justify-center gap-3 ">
-                    <Lightbulb className="h-8 w-8 text-yellow-300" /> How Our AI Writer Works
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <motion.div className="space-y-3 p-4 bg-black/20 rounded-lg border border-gray-700" variants={itemVariants}>
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 text-purple-300 mx-auto mb-3">
-                            <PenTool className="h-6 w-6" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white text-center">1. Input Your Idea</h3>
-                        <p className="text-gray-300 text-center text-sm">
-                            Start by providing your desired content title or topic and a list of relevant keywords you want to include.
-                        </p>
+                    <motion.div
+                        className="mx-auto mt-6 max-w-3xl rounded-2xl border p-5 text-center text-sm"
+                        style={{
+                            borderColor: 'var(--border)',
+                            background: 'var(--surface)',
+                            color: 'var(--text-muted)',
+                            boxShadow: 'var(--shadow-sm)',
+                        }}
+                        variants={itemVariants}
+                    >
+                        <Lightbulb className="mx-auto mb-2 h-5 w-5" style={{ color: 'var(--accent)' }} />
+                        Use the keyword miner first, then bring the strongest terms here to turn research into a draft.
                     </motion.div>
-
-                    <motion.div className="space-y-3 p-4 bg-black/20 rounded-lg border border-gray-700" variants={itemVariants}>
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-300 mx-auto mb-3">
-                            <Sparkles className="h-6 w-6" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white text-center">2. AI Generates Content</h3>
-                        <p className="text-gray-300 text-center text-sm">
-                            Our advanced AI model processes your inputs to create a unique, optimized, and coherent piece of content.
-                        </p>
-                    </motion.div>
-
-                    <motion.div className="space-y-3 p-4 bg-black/20 rounded-lg border border-gray-700" variants={itemVariants}>
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 text-green-300 mx-auto mb-3">
-                            <ClipboardCheck className="h-6 w-6" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white text-center">3. Review & Refine</h3>
-                        <p className="text-gray-300 text-center text-sm">
-                            Receive the generated content instantly. You can then review, edit, and refine it to perfectly match your needs.
-                        </p>
-                    </motion.div>
-                </div>
-
-                <motion.p className="text-gray-300 text-center pt-4" variants={itemVariants}>
-                    Our AI ensures your content is not only relevant to your topic and keywords but also engaging and high-quality,
-                    saving you time and effort in your content creation process.
-                </motion.p>
-            </motion.section>
+                </motion.section>
+            </main>
 
             <Footer />
         </div>
-    )
+    );
 }

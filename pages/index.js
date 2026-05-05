@@ -1,161 +1,161 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Lightbulb, Search, ListChecks, Users, TrendingUp, Send, Menu, Loader2, ChevronRight, FileText, Zap } from 'lucide-react';
+import {
+    ArrowUpRight,
+    BarChart3,
+    CheckCircle2,
+    ChevronRight,
+    Download,
+    FileJson,
+    Lightbulb,
+    ListChecks,
+    Loader2,
+    Search,
+    Send,
+    ShieldCheck,
+    Sparkles,
+    Target,
+    TrendingUp,
+    Users,
+    Zap,
+} from 'lucide-react';
 import { extractKeywords } from '@/utils/keywordUtils';
-import { getCompetitorsUrls, generateContentSuggestions } from '@/utils/seoUtils';
+import { getCompetitorsUrls } from '@/utils/seoUtils';
+import axios from 'axios';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { fetchHtml } from '@/utils/fetchUtils';
+
+const featureCards = [
+    {
+        icon: Search,
+        title: 'Keyword Extraction',
+        description: 'Pull practical keyword signals from any public page in seconds.',
+        points: ['High-impact terms', 'Clean keyword lists', 'Simple exports'],
+    },
+    {
+        icon: TrendingUp,
+        title: 'Gap Analysis',
+        description: 'Compare your page against ranking competitors and spot missing opportunities.',
+        points: ['Find missed phrases', 'Compare profiles', 'Prioritize content ideas'],
+    },
+    {
+        icon: Users,
+        title: 'Competitor Discovery',
+        description: 'Surface pages that matter for your topic and use them as research inputs.',
+        points: ['Top page lookup', 'Fast crawl checks', 'Actionable URLs'],
+    },
+    {
+        icon: Lightbulb,
+        title: 'Content Direction',
+        description: 'Turn extracted keywords into smarter briefs, outlines, and article ideas.',
+        points: ['Topic inspiration', 'Brief planning', 'SEO-friendly writing'],
+    },
+];
+
+const useCases = [
+    ['Competitor Analysis', 'Analyze what competing pages are emphasizing before you publish.'],
+    ['Content Creation', 'Build better briefs with real terms from pages already in the market.'],
+    ['Marketing Trends', 'See repeated language patterns and emerging topic angles faster.'],
+];
+
+const faqs = [
+    ['Does it work for every website?', 'Most public pages are supported. Some sites may block automated requests or expose very little readable content.'],
+    ['Is this tool free?', 'Yes. The core keyword extraction workflow is free to use.'],
+    ['What keywords do I get?', 'You get SEO-relevant terms extracted directly from the page content and competitor pages.'],
+];
 
 export default function Home() {
-    const [url, setUrl] = useState("");
+    const [url, setUrl] = useState('');
     const [keywords, setKeywords] = useState(null);
-    const [gaps, setGaps] = useState(null);  // New state for keyword gaps
+    const [gaps, setGaps] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [adLoaded, setAdLoaded] = useState(false); // State to track ad loading
-    const [contentSuggestions, setContentSuggestions] = useState(null); // State for content suggestions
-    const [competitorUrls, setCompetitorUrls] = useState(null); // State to store competitor URLs
-
+    const [adLoaded, setAdLoaded] = useState(false);
+    const [contentSuggestions, setContentSuggestions] = useState(null);
+    const [competitorUrls, setCompetitorUrls] = useState(null);
     const [btnStatus, setBtnStatus] = useState('Mine Keywords');
 
-    // Contact Form State
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submissionStatus, setSubmissionStatus] = useState(null); // 'success', 'error', null
+    const [submissionStatus, setSubmissionStatus] = useState(null);
 
-    // Function to load Google AdSense script
     const loadAdSenseScript = () => {
-        if (typeof window === 'undefined' || document.querySelector('#adsense-script')) {
-            return; // Prevent running on server, and prevent multiple loads
-        }
+        if (typeof window === 'undefined' || document.querySelector('#adsense-script')) return;
         const script = document.createElement('script');
         script.id = 'adsense-script';
         script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8393566924928419';
         script.async = true;
         script.crossOrigin = 'anonymous';
         document.head.appendChild(script);
-
-        script.onload = () => {
-            setAdLoaded(true); // Set state when script loads
-            console.log("Adsense script loaded")
-        };
-
-        script.onerror = () => {
-            console.error("Failed to load AdSense script.");
-        };
+        script.onload = () => setAdLoaded(true);
+        script.onerror = () => console.error('Failed to load AdSense script.');
     };
 
     const handleGetKeywords = async () => {
         if (!url) {
             setError('Please enter a URL.');
-            setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
+            setTimeout(() => setError(null), 2000);
             return;
         }
-        
-        // setError("Oops! The service is currently down.");
-        // setTimeout(() => setError(null), 3000);
-        // return
-        
-
         setLoading(true);
         setError(null);
         setKeywords(null);
-        setGaps(null); // Clear previous results
-        setCompetitorUrls(null)
+        setGaps(null);
+        setCompetitorUrls(null);
         setContentSuggestions(null);
-        setBtnStatus('Analyzing...')
+        setBtnStatus('Analyzing...');
 
         try {
-            //  Basic URL validation
-            //  try {
-            //     new URL(url);
-
-            // } catch (_) {
-            //     setError('Invalid URL. Please enter a valid URL, including the protocol (http:// or https://).');
-            //     setLoading(false);
-            //     return;
-            // }
             let formattedUrl = url.trim();
-
-            // Add https:// if missing
             if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
                 formattedUrl = 'https://' + formattedUrl;
             }
-
-            const metadataResponse = await fetchHtml(formattedUrl);
-
+            const metadataResponse = await axios.get(`/api/getPageMetadata?url=${encodeURIComponent(formattedUrl)}`);
             if (metadataResponse.status !== 200) return;
 
-            setBtnStatus('Extracting Keywords...')
+            setBtnStatus('Extracting Keywords...');
             const currentPageKeywords = await extractKeywords(formattedUrl);
 
-            setBtnStatus('Analyzing Competitors...')
+            setBtnStatus('Analyzing Competitors...');
             const topPageUrls = await getCompetitorsUrls(formattedUrl);
 
-            setBtnStatus('Extracting Keywords...')
-            // Extract keywords from the top 3 pages
+            setBtnStatus('Extracting Keywords...');
             const topPageKeywords = await Promise.all(
                 topPageUrls.map(async (pageUrl) => {
-                    const res = await fetchHtml(pageUrl);
+                    const res = await fetch(`/api/getPageMetadata?url=${encodeURIComponent(pageUrl)}`);
                     if (res.status === 200) {
                         const competitorKeywords = await extractKeywords(pageUrl);
-                        if (competitorKeywords.keywords) {
-                            return competitorKeywords
-                        }
-                        else {
-                            return { keywords: [], topKeyword: "" }
-                        }
-                        // return await extractKeywords(pageUrl);
+                        return competitorKeywords.keywords ? competitorKeywords : { keywords: [], topKeyword: '' };
                     }
-                    // return null; // Return empty array for invalid URLs
-                    return { keywords: [], topKeyword: "" };
+                    return { keywords: [], topKeyword: '' };
                 })
             );
 
-            // Combine all keywords from top pages into a single array
-            // const allTopKeywords = topPageKeywords.flat();
             const allTopKeywords = topPageKeywords
-                .filter(item => item !== null) // remove null entries
-                .flatMap(item => item.keywords.map(keyword => keyword.toLowerCase()));
-
-            // Calculate keyword gaps (keywords present in top pages but not in current page)
+                .filter(Boolean)
+                .flatMap((item) => item.keywords.map((keyword) => keyword.toLowerCase()));
             const calculatedGaps = allTopKeywords.filter(
-                keyword => !currentPageKeywords.keywords.includes(keyword)
+                (keyword) => !currentPageKeywords.keywords.includes(keyword)
             );
-
-            // setBtnStatus("Generating Suggestions...");
-            // const suggestions = await generateContentSuggestions(metadataResponse.data, calculatedGaps);
 
             setKeywords(currentPageKeywords.keywords);
             setGaps(calculatedGaps);
             setCompetitorUrls(topPageUrls);
-            // setContentSuggestions(suggestions);
-
         } catch (error) {
-            let errorMessage = "Something went wrong. Please try again.";
-            // 1. Vercel timeout / network failure
-            if (error.name === "AbortError" || error.message?.includes("timeout") || error.message?.includes("Failed to fetch") || !error.response ) {
-                errorMessage = "The request took too long and timed out. Please try again.";
-            }
-            // 2. Server returned structured error
-            else if (error.response?.data?.error) {
+            let errorMessage;
+            if (error.response?.data?.error) {
                 errorMessage = error.response.data.error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else {
+                errorMessage = 'An error occurred while extracting keywords. Please try again later.';
             }
-            // 3. Fallback 
-            else if (error.message) {
-                errorMessage = error.message;   
-            }
-
             setError(errorMessage);
-            // setError("Oops! The service is currently down.");
-            // setTimeout(() => setError(null), 2000); // Clear error after 2 seconds
-
         } finally {
             setLoading(false);
-            setBtnStatus('Mine Keywords')
+            setBtnStatus('Mine Keywords');
         }
     };
 
@@ -163,24 +163,17 @@ export default function Home() {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmissionStatus(null);
-
         try {
             const response = await fetch('/api/contact', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, message }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to send message');
             }
-
-            const result = await response.json();
-            console.log('Success:', result);
-
+            await response.json();
             setName('');
             setEmail('');
             setMessage('');
@@ -193,7 +186,6 @@ export default function Home() {
         }
     };
 
-    // ===== Export Report Functionality =====
     const downloadFile = (filename, content, mimeType) => {
         const blob = new Blob([content], { type: mimeType || 'text/plain;charset=utf-8;' });
         const urlObj = URL.createObjectURL(blob);
@@ -209,9 +201,7 @@ export default function Home() {
     const escapeCsv = (value) => {
         if (value === null || value === undefined) return '';
         const str = String(value);
-        if (/[",\n,]/.test(str)) {
-            return '"' + str.replace(/"/g, '""') + '"';
-        }
+        if (/[",\n,]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
         return str;
     };
 
@@ -220,19 +210,17 @@ export default function Home() {
         const suggestionText = typeof contentSuggestions === 'object' && contentSuggestions?.text
             ? contentSuggestions.text
             : (contentSuggestions || '');
-
         const rows = [
             ['Report For URL', url || ''],
             ['Generated At', timestamp],
             ['Keywords Count', keywords?.length || 0],
-            ['Keywords', (keywords && keywords.length ? keywords.join(' | ') : '')],
+            ['Keywords', keywords?.length ? keywords.join(' | ') : ''],
             ['Keyword Gaps Count', gaps?.length || 0],
-            ['Top 30 Keyword Gaps', (gaps && gaps.length ? gaps.slice(0, 30).join(' | ') : '')],
-            ['Competitor URLs', (competitorUrls && competitorUrls.length ? competitorUrls.join(' | ') : '')],
+            ['Top 30 Keyword Gaps', gaps?.length ? gaps.slice(0, 30).join(' | ') : ''],
+            ['Competitor URLs', competitorUrls?.length ? competitorUrls.join(' | ') : ''],
             ['Content Suggestion', suggestionText],
         ];
-
-        const csv = rows.map(r => r.map(escapeCsv).join(',')).join('\n');
+        const csv = rows.map((row) => row.map(escapeCsv).join(',')).join('\n');
         return 'Section,Data\n' + csv + '\n';
     };
 
@@ -256,652 +244,552 @@ export default function Home() {
         downloadFile(filename, JSON.stringify(report, null, 2), 'application/json;charset=utf-8;');
     };
 
-    // to load adsense script 
     useEffect(() => {
-        loadAdSenseScript(); // Load AdSense script on component mount
-
-        // Cleanup function to remove the script when the component unmounts
+        loadAdSenseScript();
         return () => {
             const script = document.querySelector('#adsense-script');
-            if (script) {
-                script.remove();
-            }
+            if (script) script.remove();
             setAdLoaded(false);
         };
     }, []);
 
     useEffect(() => {
         if (submissionStatus === 'success') {
-            const timer = setTimeout(() => {
-                setSubmissionStatus(null);
-            }, 3000); // 3 seconds
-
-            return () => clearTimeout(timer); // Clear timeout if component unmounts or status changes
+            const timer = setTimeout(() => setSubmissionStatus(null), 3000);
+            return () => clearTimeout(timer);
         }
     }, [submissionStatus]);
 
     return (
-        // <div id="#" className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
-        <div id="#" className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-4 sm:p-8 ">
-
+        <div className="relative min-h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
             <Header />
 
-            {/* hero section */}
-            <section className="max-w-4xl mx-auto space-y-6 mt-10 min-h-[20rem]  flex justify-center items-center">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className='space-y-6 w-full'
-                >
-                    <div className="text-center">
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl md:leading-16 font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-                            {/* SEO Keyword Miner */}
-                            Discover High-Impact Keywords
-                        </h1>
-                        <p className="text-gray-400 text-base sm:text-lg">
-                            {/* Enter a URL to extract relevant SEO keywords. */}
-                            Instantly extract high-impact SEO keywords from any webpage. Just enter a URL to start mining!
-                        </p>
-                    </div>
+            <main className="px-4 sm:px-8">
+                {/* Hero */}
+                <section className="relative mx-auto grid max-w-7xl gap-10 pb-16 pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:pt-24">
+                    {/* Decorative grid */}
+                    <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" />
+                    {/* Decorative blob */}
+                    <div className="pointer-events-none absolute -right-40 -top-20 h-[500px] w-[500px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #2ea870 0%, transparent 70%)' }} />
+                    <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #1a7a52 0%, transparent 70%)' }} />
 
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <input
-                            type="text"
-                            placeholder="Enter website Url (e.g., example.com)"
-                            value={url}
-                            onChange={(e) => setUrl(e.target.value)}
-                            className="flex-1 bg-black/20 text-white border-purple-500/30 placeholder:text-gray-500 rounded-md py-3 px-4"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleGetKeywords();
-                                }
-                            }}
-                        />
-                        <button
-                            onClick={handleGetKeywords}
-                            disabled={loading}
-                            className="bg-gradient-to-r flex items-center justify-center from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600
-                        disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-md"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                                    {btnStatus}
-                                </>
-                            ) : (
-                                <>
-                                    <Zap className="w-5 h-5 mr-2" />
-                                    {btnStatus}
-                                </>
-                            )}
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative space-y-8"
+                    >
+                        <div className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold" style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--accent)' }}>
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Free SEO research workspace
+                        </div>
 
-                        </button>
-                    </div>
+                        <div className="space-y-5">
+                            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-7xl" style={{ fontFamily: 'Instrument Serif, Georgia, serif' }}>
+                                Discover keywords your next page should{' '}
+                                <span className="italic" style={{ color: 'var(--accent)' }}>own.</span>
+                            </h1>
+                            <p className="max-w-xl text-lg leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                                Enter a URL to extract page keywords, compare competitor language, and export a tidy report for content planning.
+                            </p>
+                        </div>
 
-                    {error && (
-                        <div className="bg-red-500/10 text-red-400 border-red-500/30 p-4 rounded-md flex items-start gap-2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="h-4 w-4 mt-1"
-                            >
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" x2="12" y1="8" y2="12"></line>
-                                <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                            </svg>
+                        <div className="flex flex-wrap gap-3">
+                            {[
+                                ['Fast crawl', Zap],
+                                ['Keyword gaps', Target],
+                                ['Export ready', Download],
+                            ].map(([label, Icon]) => (
+                                <div
+                                    key={label}
+                                    className="flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium"
+                                    style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-secondary)' }}
+                                >
+                                    <Icon className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                                    {label}
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+
+                    {/* Tool card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 32 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative rounded-2xl border p-5 sm:p-7"
+                        style={{
+                            borderColor: 'var(--border)',
+                            background: 'var(--surface)',
+                            boxShadow: 'var(--shadow-xl)',
+                        }}
+                    >
+                        {/* Card header */}
+                        <div className="mb-6 flex items-center justify-between">
                             <div>
-                                <h2 className="text-lg font-semibold">Error</h2>
-                                <p>{error}</p>
+                                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                                    Analyze URL
+                                </p>
+                                <h2 className="mt-1 text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+                                    Keyword miner
+                                </h2>
+                            </div>
+                            <div className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: 'var(--foreground)', color: 'var(--background)' }}>
+                                <Search className="h-5 w-5" />
                             </div>
                         </div>
-                    )}
 
-                    {/* Google AdSense Ad Unit */}
-                    {adLoaded && (
-                        <div className="my-4">
-                            <ins
-                                className="adsbygoogle"
-                                style={{ display: "block" }}
-                                data-ad-client="ca-pub-8393566924928419" // Replace with your actual client ID
-                                data-ad-slot="7861407634"  // Replace with your actual ad slot ID
-                                data-ad-format="auto"
-                                data-full-width-responsive="true"
-                            ></ins>
+                        <div className="flex flex-col gap-3">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="example.com/blog/article"
+                                    value={url}
+                                    onChange={(e) => setUrl(e.target.value)}
+                                    className="h-14 w-full rounded-xl border px-4 text-sm font-medium outline-none transition-all duration-200"
+                                    style={{
+                                        borderColor: 'var(--border)',
+                                        background: 'var(--surface-2)',
+                                        color: 'var(--foreground)',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = 'var(--accent)';
+                                        e.target.style.background = 'var(--surface)';
+                                        e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = 'var(--border)';
+                                        e.target.style.background = 'var(--surface-2)';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleGetKeywords(); }}
+                                />
+                            </div>
+                            <button
+                                onClick={handleGetKeywords}
+                                disabled={loading}
+                                className="flex h-14 w-full items-center justify-center gap-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+                                style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+                                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'var(--accent)'; }}
+                                onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = 'var(--foreground)'; }}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        {btnStatus}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Zap className="h-4 w-4" />
+                                        {btnStatus}
+                                    </>
+                                )}
+                            </button>
                         </div>
-                    )}
 
-                    {(keywords || gaps || contentSuggestions) && (
-                        <div className="opacity-0 animate-fadeIn delay-300">
-                            <div className="bg-black/20 border-purple-500/30 rounded-md">
-                                <div className="p-6">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div>
-                                            <h2 className="text-white text-2xl font-semibold mb-2">SEO Keywords</h2>
-                                            <p className="text-gray-400 mb-4">
-                                                Top {keywords?.length} keywords extracted from the URL.
-                                            </p>
-                                        </div>
-                                        
+                        {error && (
+                            <div className="mt-4 rounded-xl border p-4 text-sm font-medium" style={{ borderColor: '#fca5a5', background: '#fef2f2', color: '#dc2626' }}>
+                                {error}
+                            </div>
+                        )}
 
-                                        {/* Export buttons */}
-                                        <div className="flex flex-wrap gap-2">
-                                            <button
-                                                onClick={exportReportAsCSV}
-                                                // className="bg-blue-600/80 hover:bg-blue-600 text-white text-xs px-4 py-2 rounded-md"
-                                                className="cursor-pointer hover:text-purple-300 text-white text-xs px-4 py-2 rounded-md"
-                                            >
-                                                Export Excel
-                                            </button>
-                                            <button
-                                                onClick={exportReportAsJSON}
-                                                // className="bg-purple-600/80 hover:bg-purple-600 text-white text-xs px-4 py-2 rounded-md"
-                                                className="cursor-pointer hover:text-purple-300 text-white text-xs px-4 py-2 rounded-md"
-                                            >
-                                                Export JSON
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
+                        {adLoaded && (
+                            <div className="my-4">
+                                <ins
+                                    className="adsbygoogle"
+                                    style={{ display: 'block' }}
+                                    data-ad-client="ca-pub-8393566924928419"
+                                    data-ad-slot="7861407634"
+                                    data-ad-format="auto"
+                                    data-full-width-responsive="true"
+                                />
+                            </div>
+                        )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {keywords && keywords.length > 0 ? (
-                                            <div className="space-y-4">
-                                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                                    <ListChecks className="w-5 h-5 text-green-400" />
-                                                    Extracted Keywords
-                                                </h3>
-                                                <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-purple-500/20 rounded-lg shadow-md p-4">
-                                                    {keywords.map((keyword, index) => (
-                                                        <div key={index} className="text-gray-300 py-2 border-b border-purple-500/20 last:border-none flex items-center gap-2">
-                                                            <ChevronRight className="w-4 h-4 text-purple-400" />
-                                                            <span className="font-medium">{keyword}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="text-gray-400">No keywords found.</div>
-                                        )}
-                                        {gaps && gaps.length > 0 && (
-                                            <div className="space-y-2">
-                                                {/* <h3 className="text-lg font-semibold text-red-400">Top {gaps.length>30?30:gaps.length} Keyword Gaps (Top Ranking Pages)</h3> */}
-                                                <h3 className="text-lg font-semibold text-red-400 flex items-center gap-2">
-                                                    <TrendingUp className="w-5 h-5" />
-                                                    Keyword Gaps (Top Ranking Pages)
-                                                </h3>
-                                                <div className="bg-black/50 rounded-md p-4 space-y-2">
-                                                    {gaps.slice(0, 30).map((gap, index) => (  // Limit to 30
-                                                        <div key={index} className="text-red-300 py-1 border-b border-purple-500/20 last:border-none flex items-center gap-1.5">
-                                                            <ChevronRight className="w-4 h-4 text-red-400" />
-                                                            {gap}
-                                                        </div>
-                                                    ))}
-                                                </div>
+                        <div className="mt-6 grid grid-cols-3 gap-3 border-t pt-5" style={{ borderColor: 'var(--border)' }}>
+                            {[
+                                [keywords?.length || 0, 'Keywords'],
+                                [gaps?.length || 0, 'Gaps'],
+                                [competitorUrls?.length || 0, 'Competitors'],
+                            ].map(([value, label]) => (
+                                <div key={label} className="rounded-xl p-3 text-center" style={{ background: 'var(--surface-2)' }}>
+                                    <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{value}</p>
+                                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                </section>
 
-                                                {competitorUrls && competitorUrls.length > 0 && (
-                                                    <div className="bg-black/50 border-purple-500/20 p-4 rounded-md">
-                                                        <h3 className="text-base font-semibold text-blue-400 flex items-center gap-2">
-                                                            <Users className="w-5 h-5" />
-                                                            Competitor URLs
-                                                        </h3>
-                                                        <p className="text-gray-300 my-3 text-sm">
-                                                            Top {competitorUrls.length} competing websites
-                                                        </p>
-
-                                                        <ul className="space-y-2">
-                                                            {competitorUrls.map((competitorUrl, index) => (
-                                                                <li key={index} className="text-blue-300 hover:text-blue-200 transition-colors text-xs">
-                                                                    <a href={competitorUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                                                                        <ChevronRight className="w-4 h-4" />
-                                                                        {competitorUrl}
-                                                                    </a>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* kept commented for now for prevent unnessary api usage  */}
-                                    {/* commenting the function call for it to above */}
-                                    {/* {contentSuggestions ? (
-                                        <div className="mt-8 space-y-4">
-                                            <div className="bg-black/50 border-purple-500/20 rounded-md">
-                                                <div className="p-4">
-                                                    <h3 className="text-white text-lg flex items-center gap-2">
-                                                        <Lightbulb className="w-5 h-5 text-yellow-400" />
-                                                        Content Optimization Suggestion
-                                                    </h3>
-                                                </div>
-                                                <div className="p-4">
-                                                    <p className="text-gray-300">{contentSuggestions.text}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : null} */}
+                {/* Results */}
+                {(keywords || gaps || contentSuggestions) && (
+                    <section className="mx-auto max-w-7xl pb-16">
+                        <div className="animate-fadeIn rounded-2xl border p-5 sm:p-7" style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-lg)' }}>
+                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Generated report</p>
+                                    <h2 className="mt-1 text-2xl font-bold" style={{ color: 'var(--foreground)' }}>SEO keyword results</h2>
+                                    <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
+                                        {keywords?.length || 0} keywords extracted from the URL.
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={exportReportAsCSV}
+                                        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors"
+                                        style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--surface-2)' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Export CSV
+                                    </button>
+                                    <button
+                                        onClick={exportReportAsJSON}
+                                        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors"
+                                        style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--surface-2)' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                                    >
+                                        <FileJson className="h-4 w-4" />
+                                        Export JSON
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    )}
-                </motion.div>
-            </section>
 
-            {/* How It Works Section */}
-            {/* <section id="how-it-works" className="max-w-6xl mx-auto mt-20 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 rounded-xl p-6 text-gray-300 space-y-28"> */}
-            <section id="how-it-works" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="mx-auto space-y-10"
-                >
-                    <h2 className="text-2xl font-bold text-white text-center">How It Works</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid gap-4 lg:grid-cols-2">
+                                <ResultList
+                                    title="Extracted Keywords"
+                                    icon={ListChecks}
+                                    empty="No keywords found."
+                                    items={keywords}
+                                    tone="emerald"
+                                />
+                                <ResultList
+                                    title="Keyword Gaps"
+                                    icon={Target}
+                                    empty="No keyword gaps found."
+                                    items={gaps}
+                                    tone="sky"
+                                />
+                            </div>
 
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Search className="h-6 w-6 text-blue-400" /> Analyze a URL
-                                </h3>
-                                <p className="text-gray-400 mt-2 text-sm">
-                                    Enter the URL of any website to begin the analysis.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <p className="text-gray-300 text-sm">
-                                    Our AI will crawl the website and extract relevant data.
-                                </p>
-                            </div>
+                            {competitorUrls?.length > 0 && (
+                                <div className="mt-4 rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--surface-2)' }}>
+                                    <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                                        <Users className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                                        Competitor pages analyzed
+                                    </h3>
+                                    <div className="grid gap-2">
+                                        {competitorUrls.map((pageUrl, index) => (
+                                            <a
+                                                key={pageUrl}
+                                                href={pageUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center justify-between gap-3 rounded-lg border px-3.5 py-3 text-sm font-medium transition-all"
+                                                style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-secondary)' }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                                            >
+                                                <span className="min-w-0 truncate">{index + 1}. {pageUrl}</span>
+                                                <ArrowUpRight className="h-4 w-4 shrink-0" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
+                    </section>
+                )}
 
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Lightbulb className="h-6 w-6 text-yellow-400" />Get AI-Powered Insights
-                                </h3>
-                                <p className="text-gray-400 mt-2 text-sm">
-                                    Receive a detailed report with keywords, gaps, and more.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <p className="text-gray-300 text-sm">
-                                    Understand your SEO strengths and weaknesses.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Rocket className="h-6 w-6 text-purple-400" />Improve Your SEO
-                                </h3>
-                                <p className="text-gray-400 mt-2 text-sm">
-                                    Use the insights to optimize your content and strategy.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <p className="text-gray-300 text-sm">
-                                    Boost your search engine rankings and attract more traffic.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {/*Expanded Explanation of How it Works */}
-                    <div className="space-y-4">
-                        <h3 className="text-2xl font-semibold text-white">Deeper Dive into the Process</h3>
-                        <p className="text-gray-400">
-                            Our SEO Keyword Miner is designed to provide you with a comprehensive understanding of your website's SEO performance and help you identify opportunities for improvement. Here's a more detailed breakdown of how it works:
-                        </p>
-
-                        <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-1"><FileText className='h-4 w-4' /> URL Analysis and Data Extraction</h4>
-                        <ul className="text-sm sm:text-base list-disc list-inside space-y-2 text-gray-300">
-                            <li>When you enter a URL, our system initiates a process to retrieve the website's content, including text, HTML structure, and metadata.</li>
-                            <li>We then use Natural Language Processing (NLP) techniques to analyze the text and identify the most relevant keywords. This involves understanding the context, frequency, and importance of words and phrases on the page.</li>
-                            <li>Our tool also examines the website's HTML structure to extract information such as title tags, meta descriptions, headings, and other elements that are important for SEO.</li>
-                            <li>We analyze the links pointing to the website (backlinks) to assess its authority and credibility.</li>
-                        </ul>
-
-                        <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-1"><Lightbulb className='h-4 w-4' /> AI-Powered Insights and Reporting</h4>
-                        <ul className="text-sm sm:text-base list-disc list-inside space-y-2 text-gray-300">
-                            <li>The extracted data is then processed by our AI algorithms to generate actionable insights. This includes identifying the top keywords that the website is ranking for, as well as keywords that it is not ranking for but its competitors are (keyword gaps).</li>
-                            <li>We provide you with a list of competitor websites that are ranking for similar keywords. This allows you to understand who your main competitors are and what they are doing to rank well.</li>
-                            <li>Our tool also generates content ideas based on the keyword analysis. These ideas are designed to help
-                                you create new content that is optimized for search engines and will attract more traffic to your
-                                website.</li>
-                            <li>All of this information is presented in a clear and easy-to-understand report, with visualizations
-                                and explanations to help you make informed decisions.</li>
-                        </ul>
-                        <h4 className="text-lg font-semibold text-purple-300 flex items-center gap-1"><Rocket className='h-4 w-4' /> Continuous Improvement and Optimization</h4>
-                        <ul className="text-sm sm:text-base list-disc list-inside space-y-2 text-gray-300">
-                            <li>SEO is an ongoing process, and our tool is designed to help you continuously improve your website's
-                                performance.</li>
-                            <li>You can use our tool to track your keyword rankings over time, monitor your competitor's activities,
-                                and identify new opportunities for content creation and optimization.</li>
-                            <li>Our AI algorithms are constantly being updated to reflect the latest changes in search engine
-                                algorithms, so you can be confident that you are getting the most up-to-date and accurate
-                                information.</li>
-                        </ul>
-                    </div>
-                </motion.div>
-            </section>
-
-            {/* Features Section */}
-            <section id="features" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-8"
-                >
-                    <h2 className="text-2xl font-bold text-white text-center">Key Features</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Search className="h-6 w-6 text-blue-400" /> Keyword Extraction
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    Extract relevant keywords from any URL.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <ul className="text-sm list-disc list-inside space-y-1 text-gray-300">
-                                    <li>Identifies high-impact keywords</li>
-                                    <li>Supports multiple languages</li>
-                                    <li>Provides keyword variations</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <TrendingUp className="h-6 w-6 text-red-400" /> Keyword Gap Analysis
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    Find keywords your competitors are ranking for.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <ul className="text-sm list-disc list-inside space-y-1 text-gray-300">
-                                    <li>Uncover missed opportunities</li>
-                                    <li>Compare keyword profiles</li>
-                                    <li>Prioritize high-value gaps</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Users className="h-6 w-6 text-green-400" /> Competitor Analysis
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    Analyze your competitor's top-ranking pages.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <ul className="text-sm list-disc list-inside space-y-1 text-gray-300">
-                                    <li>Identify key competitors</li>
-                                    <li>See their content strategy</li>
-                                    <li>Discover their link-building efforts</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="bg-black/30  border-purple-500/10  hover:shadow-xl transition-shadow rounded-md">
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                                    <Lightbulb className="h-6 w-6 text-yellow-400" /> AI Content Ideas
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    Get AI-powered suggestions for new content.
-                                </p>
-                            </div>
-                            <div className="p-4">
-                                <ul className="text-sm list-disc list-inside space-y-1 text-gray-300">
-                                    <li>Generate relevant topics</li>
-                                    <li>Create engaging titles</li>
-                                    <li>Optimize for target keywords</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </section>
-
-            <section id="use-cases" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-4"
-                >
-                    <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-                        <Lightbulb className="w-6 h-6 text-yellow-400" /> Use Cases
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                                <Users className="w-8 h-8 text-pink-400 mb-2" />
-                                <h3 className="font-semibold text-lg text-white">Competitor Analysis</h3>
-                                <p className="text-gray-400 text-sm py-2">Analyze competitors' SEO strategy.</p>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                                <Search className="w-8 h-8 text-orange-400 mb-2" />
-                                <h3 className="font-semibold text-lg text-white">Content Creation</h3>
-                                <p className="text-gray-400 text-sm py-2">Research keywords for content writing.</p>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="bg-black/30 rounded-md p-4 border border-purple-500/10">
-                                <TrendingUp className="w-8 h-8 text-cyan-400 mb-2" />
-                                <h3 className="font-semibold text-lg text-white">Marketing Trends</h3>
-                                <p className="text-gray-400 text-sm py-2">Discover trends for digital marketing.</p>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </section>
-
-            <section id="faqs" className="max-w-6xl mx-auto mt-20  rounded-xl p-6 text-gray-300 space-y-28">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
-                >
-                    <h2 className="text-2xl font-bold text-white text-center">❓ FAQs</h2>
-                    <div className="space-y-4">
-                        <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                            <h3 className="font-semibold text-lg text-white">
-                                🔗 Does it work for every website?
-                            </h3>
-                            <p className="text-gray-400">
-                                Most public pages are supported. Some may restrict bots or have minimal readable content.
-                            </p>
-                        </div>
-                        <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                            <h3 className="font-semibold text-lg text-white">
-                                💸 Is this tool free?
-                            </h3>
-                            <p className="text-gray-400">
-                                Absolutely! Enjoy full functionality with zero cost.
-                            </p>
-                        </div>
-                        <div className="bg-black/30 rounded-xl p-4 border border-purple-500/10 md:text-center">
-                            <h3 className="font-semibold text-lg text-white">
-                                🧠 What keywords do I get?
-                            </h3>
-                            <p className="text-gray-400">
-                                We extract SEO-relevant terms directly from the content you provide.
-                            </p>
-                        </div>
-                    </div>
-                </motion.div>
-            </section>
-
-            {/* About Us Section */}
-            <motion.section id="about"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-gradient-to-br from-gray-800/40 to-black/30 border border-purple-500/20 shadow-lg"
-            >
-                <h3 className="text-2xl font-semibold text-white mb-4 flex items-center justify-center gap-2">
-                    <Users className="w-6 h-6 text-purple-400" /> About Us
-                </h3>
-                <p className="mb-2 text-gray-300">
-                    At <strong>SEO Keyword Miner</strong>, we believe that great content starts with smart keyword research. Our platform was born out of a desire to cut through the noise and provide a streamlined, effective way to discover the search terms that actually matter.
-                </p>
-                <p className="mb-2 text-gray-300">
-                    In a digital world flooded with data, most keyword tools either overwhelm users with complexity or limit access to critical insights. We set out to change that. SEO Keyword Miner is built for content creators, marketers, and SEO professionals who want fast, accurate, and practical keyword data — without the clutter.
-                </p>
-                <p className="mb-2 text-gray-300">
-                    Whether you're a solo blogger trying to grow your audience, an e-commerce brand seeking better visibility, or a digital agency juggling multiple clients, our tool is designed to work for you. With features like keyword extraction from any URL, keyword gap analysis, AI-powered content ideas, and multilingual support, you’ll gain a clearer understanding of what’s driving search traffic in your niche.
-                </p>
-                <p className="mb-2 text-gray-300">
-                    Our philosophy is grounded in three core values: <strong>simplicity</strong>, <strong>transparency</strong>, and <strong>usefulness</strong>. We don’t believe in upsells, feature bloat, or complicated dashboards. Instead, we focus on giving you the insights you need, as quickly and clearly as possible.
-                </p>
-                <p className="mb-2 text-gray-300">
-                    SEO Keyword Miner is a side project — but one driven by passion, real-world SEO experience, and a deep respect for the creators and marketers who power the internet. We're constantly improving and refining the tool based on user feedback and evolving search trends.
-                </p>
-                <p className="text-gray-300">
-                    Thank you for being a part of this journey. We’re excited to help you make smarter content decisions, uncover new opportunities, and ultimately grow with confidence in the world of search.
-                </p>
-            </motion.section>
-
-            {/* Contact Us Section */}
-            <motion.section id="contact"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-4xl mx-auto mt-16 text-purple-200 text-center rounded-xl p-6 bg-black/50 border border-purple-500/20 shadow-lg"
-            >
-                <h3 className="text-2xl font-semibold text-white mb-4 flex items-center justify-center gap-2">
-                    <Lightbulb className="w-6 h-6 text-yellow-400" /> Contact Us
-                </h3>
-                <p className="text-gray-300 mb-4 text-sm w-10/12 m-auto">
-
-                    Please fill out the form below to get in touch with us for any questions or inquiries.  We're here to help you
-                    maximize your SEO potential..
-                </p>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <input
-                            type="text"
-                            placeholder="Your Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            className="flex-1 bg-black/30 text-white border border-purple-500/30 placeholder:text-gray-500 rounded-md py-3 px-4 shadow-sm"
-                        />
-                        <input
-                            type="email"
-                            placeholder="Your Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="flex-1 bg-black/30 text-white border border-purple-500/30 placeholder:text-gray-500 rounded-md py-3 px-4 shadow-sm"
-                        />
-                    </div>
-                    <textarea
-                        placeholder="Your Message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        required
-                        rows={4}
-                        className="bg-black/30 text-white border border-purple-500/30 placeholder:text-gray-500 rounded-md py-3 px-4 shadow-sm w-full"
+                {/* How it works */}
+                <section id="how-it-works" className="mx-auto max-w-7xl py-20">
+                    <SectionHeading
+                        eyebrow="Workflow"
+                        title="From page URL to useful SEO direction"
+                        description="A focused research loop: crawl, compare, export, and plan the next content move."
                     />
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="mx-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-xl shadow-md flex items-center justify-center gap-2"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Send className="w-4 h-4 animate-spin" /> Sending...
-                            </>
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4" /> Send Message
-                            </>
-                        )}
-                    </button>
-                </form>
-                {submissionStatus === 'success' && (
-                    <div className="mt-4 text-green-400 bg-green-500/10 border border-green-500/30 p-3 rounded-md">
-                        Thank you! Your message has been sent.
+                    <div className="mt-10 grid gap-4 md:grid-cols-3">
+                        {[
+                            ['01', 'Paste a page', 'Add any public URL and the app normalizes the address for analysis.'],
+                            ['02', 'Compare the market', 'Competitor pages are checked for related keyword language and gaps.'],
+                            ['03', 'Export the report', 'Download CSV or JSON for briefs, docs, or your internal workflow.'],
+                        ].map(([step, title, description], i) => (
+                            <motion.div
+                                key={step}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1, duration: 0.5 }}
+                                className="rounded-2xl border p-6"
+                                style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-sm)' }}
+                            >
+                                <div className="mb-5 text-4xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--border-strong)' }}>
+                                    {step}
+                                </div>
+                                <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>{title}</h3>
+                                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{description}</p>
+                            </motion.div>
+                        ))}
                     </div>
-                )}
-                {submissionStatus === 'error' && (
-                    <div className="mt-4 text-red-400 bg-red-500/10 border border-red-500/30 p-3 rounded-md">
-                        Sorry, there was an error sending your message. Please try again.
-                    </div>
-                )}
-            </motion.section>
+                </section>
 
-            {/* <section id="contact" className="py-16 bg-black/50 backdrop-blur-md border-b border-gray-800 px-4 sm:px-6 lg:px-8">
-            <div className="w-full mx-auto space-y-8">
-                <h2 className="text-3xl font-bold text-white text-center">Contact Us</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <p className="text-gray-400">
-                            Get in touch with us for any questions or inquiries.  We're here to help you
-                            maximize your SEO potential.
-                        </p>
-                        <div className="mt-6 space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Send className="h-5 w-5 text-purple-400" />
-                                <span className="text-gray-300">Email:</span>
-                                <a href="mailto:support@example.com" className="text-white hover:text-purple-300 transition-colors">support@example.com</a>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Send className="h-5 w-5 text-purple-400" />
-                                <span className="text-gray-300">Phone:</span>
-                                <span className="text-white">+1 (555) 123-4567</span>
-                            </div>
+                {/* Features */}
+                <section id="features" className="mx-auto max-w-7xl py-20">
+                    <SectionHeading
+                        eyebrow="Features"
+                        title="Research tools without dashboard clutter"
+                        description="A cleaner surface for content creators, SEO specialists, and small teams that need answers quickly."
+                    />
+                    <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        {featureCards.map(({ icon: Icon, title, description, points }, i) => (
+                            <motion.div
+                                key={title}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.08, duration: 0.5 }}
+                                className="group rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1"
+                                style={{
+                                    borderColor: 'var(--border)',
+                                    background: 'var(--surface)',
+                                    boxShadow: 'var(--shadow-sm)',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+                            >
+                                <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl" style={{ background: 'var(--foreground)', color: 'var(--background)' }}>
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>{title}</h3>
+                                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{description}</p>
+                                <div className="mt-4 space-y-1.5">
+                                    {points.map((point) => (
+                                        <p key={point} className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                                            <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: 'var(--accent)' }} />
+                                            {point}
+                                        </p>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Use cases — dark band */}
+                <section id="use-cases" className="mx-auto max-w-7xl py-20">
+                    <div
+                        className="grid gap-8 rounded-2xl p-8 md:grid-cols-[0.9fr_1.1fr] md:p-12"
+                        style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+                    >
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent-mid)' }}>Use cases</p>
+                            <h2 className="mt-3 text-3xl font-bold leading-tight" style={{ fontFamily: 'Instrument Serif, serif' }}>
+                                Built for practical content decisions.
+                            </h2>
+                        </div>
+                        <div className="grid gap-3">
+                            {useCases.map(([title, description]) => (
+                                <div
+                                    key={title}
+                                    className="rounded-xl border p-4"
+                                    style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
+                                >
+                                    <h3 className="font-semibold">{title}</h3>
+                                    <p className="mt-1 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{description}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <div>
-                        <form className="space-y-6">
-                            <input // Changed from <Input> to <input>
-                                type="text"
-                                placeholder="Your Name"
-                                className="bg-black/20 text-white border-purple-500/30 placeholder:text-gray-500 rounded-md px-4 py-2 w-full"  //Added inline
-                            />
-                            <input // Changed from <Input> to <input>
-                                type="email"
-                                placeholder="Your Email"
-                                className="bg-black/20 text-white border-purple-500/30 placeholder:text-gray-500 rounded-md px-4 py-2 w-full" //Added inline
-                            />
-                            <textarea
-                                placeholder="Your Message"
-                                className="bg-black/20 text-white border-purple-500/30 placeholder:text-gray-500 w-full min-h-[120px] rounded-md p-4" //Added inline
-                            ></textarea>
-                            <button  // Changed from <Button> to <button>
-                                type="submit"
-                                className="w-full bg-purple-500 text-white hover:bg-purple-600 rounded-md px-4 py-2" //Added inline
+                </section>
+
+                {/* FAQ */}
+                <section id="faqs" className="mx-auto max-w-5xl py-20">
+                    <SectionHeading eyebrow="FAQ" title="Straight answers" />
+                    <div className="mt-10 grid gap-3">
+                        {faqs.map(([question, answer], i) => (
+                            <motion.div
+                                key={question}
+                                initial={{ opacity: 0, y: 16 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.08, duration: 0.4 }}
+                                className="rounded-2xl border p-6"
+                                style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-sm)' }}
                             >
-                                Send Message
+                                <h3 className="font-semibold" style={{ color: 'var(--foreground)' }}>{question}</h3>
+                                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{answer}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* About */}
+                <section id="about" className="mx-auto max-w-5xl py-20">
+                    <div className="rounded-2xl border p-8 md:p-10" style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-sm)' }}>
+                        <div className="mb-6 flex items-center gap-3">
+                            <div className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+                                <ShieldCheck className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>About</p>
+                                <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>Simple keyword research for creators and marketers</h2>
+                            </div>
+                        </div>
+                        <div className="space-y-4 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                            <p>
+                                SEO Keyword Miner is built for people who want useful keyword data without a complicated dashboard. It helps you inspect pages, compare competitor language, and move from research to content planning quickly.
+                            </p>
+                            <p>
+                                The product focuses on simplicity, transparency, and usefulness: fewer distractions, clearer outputs, and reports that can be used in briefs, documents, and SEO workflows.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Contact */}
+                <section id="contact" className="mx-auto max-w-5xl py-20">
+                    <div className="grid gap-8 rounded-2xl border p-8 md:grid-cols-[0.85fr_1.15fr] md:p-10" style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-lg)' }}>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Contact</p>
+                            <h2 className="mt-2 text-3xl font-bold leading-tight" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--foreground)' }}>
+                                Need help or have feedback?
+                            </h2>
+                            <p className="mt-4 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                                Send a quick note about the tool, a bug, or a feature you would like to see next.
+                            </p>
+                        </div>
+                        <form onSubmit={handleSubmit} className="space-y-3">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <input
+                                    type="text"
+                                    placeholder="Your name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="h-12 rounded-xl border px-4 text-sm outline-none transition-all"
+                                    style={{ borderColor: 'var(--border)', background: 'var(--surface-2)', color: 'var(--foreground)' }}
+                                    onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="h-12 rounded-xl border px-4 text-sm outline-none transition-all"
+                                    style={{ borderColor: 'var(--border)', background: 'var(--surface-2)', color: 'var(--foreground)' }}
+                                    onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                                />
+                            </div>
+                            <textarea
+                                placeholder="Your message"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                required
+                                rows={5}
+                                className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all resize-none"
+                                style={{ borderColor: 'var(--border)', background: 'var(--surface-2)', color: 'var(--foreground)' }}
+                                onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px rgba(26,122,82,0.12)'; }}
+                                onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                            />
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="inline-flex h-12 items-center gap-2 rounded-xl px-6 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                                style={{ background: 'var(--foreground)', color: 'var(--background)' }}
+                                onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.background = 'var(--accent)'; }}
+                                onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.background = 'var(--foreground)'; }}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Sending...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="h-4 w-4" />
+                                        Send Message
+                                    </>
+                                )}
                             </button>
+                            {submissionStatus === 'success' && (
+                                <div className="rounded-xl border p-3 text-sm font-medium" style={{ borderColor: '#6ee7b7', background: '#ecfdf5', color: '#065f46' }}>
+                                    Thank you. Your message has been sent.
+                                </div>
+                            )}
+                            {submissionStatus === 'error' && (
+                                <div className="rounded-xl border p-3 text-sm font-medium" style={{ borderColor: '#fca5a5', background: '#fef2f2', color: '#dc2626' }}>
+                                    Sorry, there was an error sending your message. Please try again.
+                                </div>
+                            )}
                         </form>
                     </div>
-                </div>
-            </div>
-            </section> */}
+                </section>
+            </main>
 
             <Footer />
+        </div>
+    );
+}
+
+function SectionHeading({ eyebrow, title, description }) {
+    return (
+        <div className="mx-auto max-w-2xl text-center">
+            {eyebrow && (
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                    {eyebrow}
+                </p>
+            )}
+            <h2 className="mt-2 text-4xl font-bold tracking-tight" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--foreground)' }}>
+                {title}
+            </h2>
+            {description && (
+                <p className="mt-4 text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    {description}
+                </p>
+            )}
+        </div>
+    );
+}
+
+function ResultList({ title, icon: Icon, empty, items, tone }) {
+    const isEmerald = tone === 'emerald';
+    return (
+        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--surface-2)' }}>
+            <h3 className="mb-4 flex items-center gap-2.5 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                <span
+                    className="grid h-8 w-8 place-items-center rounded-lg"
+                    style={{
+                        background: isEmerald ? 'var(--accent-light)' : '#e0f2fe',
+                        color: isEmerald ? 'var(--accent)' : '#0369a1',
+                    }}
+                >
+                    <Icon className="h-4 w-4" />
+                </span>
+                {title}
+            </h3>
+            {items?.length > 0 ? (
+                <div className="max-h-96 overflow-auto rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+                    {items.map((keyword, index) => (
+                        <div
+                            key={`${keyword}-${index}`}
+                            className="flex items-center gap-2 border-b px-4 py-2.5 text-sm last:border-b-0"
+                            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+                        >
+                            <ChevronRight className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--border-strong)' }} />
+                            <span className="font-medium">{keyword}</span>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="rounded-xl border border-dashed p-6 text-center text-sm" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                    {empty}
+                </div>
+            )}
         </div>
     );
 }

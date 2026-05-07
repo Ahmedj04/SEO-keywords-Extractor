@@ -69,7 +69,7 @@ export default function AIWriter() {
     };
 
     return (
-        <div className="relative min-h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+        <div className="relative min-h-screen overflow-x-clip" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
             <Header />
 
             <main className="px-4 sm:px-8">

@@ -30,7 +30,7 @@ export default function Header() {
     }, [isMobileMenuOpen]);
 
     return (
-        <header className="sticky top-0 z-50 -mx-4 px-4 sm:-mx-8 sm:px-8 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl">
+        <header className="sticky top-0 z-50 px-4 sm:px-8 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl">
             <nav className="mx-auto flex max-w-7xl items-center justify-between py-4 text-[var(--foreground)]">
                 <Link href="/" className="group flex items-center gap-3">
                     <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--foreground)] text-[var(--background)] shadow-md transition-all duration-300 group-hover:bg-[var(--accent)] group-hover:scale-105">

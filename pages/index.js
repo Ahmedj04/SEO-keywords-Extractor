@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     ArrowUpRight,
@@ -80,6 +80,7 @@ export default function Home() {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionStatus, setSubmissionStatus] = useState(null);
+    const reportSectionRef = useRef(null);
 
     const loadAdSenseScript = () => {
         if (typeof window === 'undefined' || document.querySelector('#adsense-script')) return;
@@ -260,8 +261,14 @@ export default function Home() {
         }
     }, [submissionStatus]);
 
+    useEffect(() => {
+        if (!loading && (keywords || gaps) && reportSectionRef.current) {
+            reportSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [keywords, gaps, loading]);
+
     return (
-        <div className="relative min-h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+        <div className="relative min-h-screen overflow-x-clip" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
             <Header />
 
             <main className="px-4 sm:px-8">
@@ -423,7 +430,7 @@ export default function Home() {
 
                 {/* Results */}
                 {(keywords || gaps || contentSuggestions) && (
-                    <section className="mx-auto max-w-7xl pb-16">
+                    <section ref={reportSectionRef} className="mx-auto max-w-7xl scroll-mt-24 pb-16">
                         <div className="animate-fadeIn rounded-2xl border p-5 sm:p-7" style={{ borderColor: 'var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-lg)' }}>
                             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>

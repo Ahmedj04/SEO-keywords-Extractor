@@ -38,7 +38,7 @@ export default function Header() {
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-semibold leading-tight tracking-tight text-[var(--foreground)]">
-                            SEO Keyword Miner
+                            SEO Miner
                         </span>
                         <span className="text-[11px] text-[var(--text-muted)] leading-tight font-medium">
                             Research workspace

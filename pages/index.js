@@ -646,7 +646,7 @@ export default function Home() {
                         </div>
                         <div className="space-y-4 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                             <p>
-                                SEO Keyword Miner is built for people who want useful keyword data without a complicated dashboard. It helps you inspect pages, compare competitor language, and move from research to content planning quickly.
+                                SEO Miner is built for people who want useful keyword data without a complicated dashboard. It helps you inspect pages, compare competitor language, and move from research to content planning quickly.
                             </p>
                             <p>
                                 The product focuses on simplicity, transparency, and usefulness: fewer distractions, clearer outputs, and reports that can be used in briefs, documents, and SEO workflows.

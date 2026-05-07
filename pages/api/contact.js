@@ -41,10 +41,10 @@ const contactHandler = async (req, res) => {
         });
         // 3.2. Define the email message
         const mailOptions = {
-            from: `"SEO Keyword Miner Contact" <${process.env.EMAIL_USER}>`,
+            from: `"SEO Miner Contact" <${process.env.EMAIL_USER}>`,
             to: process.env.EMAIL_USER,
             replyTo: email,
-            subject: 'New Contact Form Submission On SEO Keyword Miner.',
+            subject: 'New Contact Form Submission On SEO Miner.',
             text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
             // html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
           };

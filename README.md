@@ -1,47 +1,51 @@
-# SEO Keywords Extractor
+# SEO Miner
 
-**Modern AI-powered SEO tool** that helps you discover high-impact keywords, analyze competitors, find keyword gaps — all from just a URL.
+SEO Miner is a modern SEO research workspace for extracting keywords from public pages, comparing competitor language, finding keyword gaps, and turning research into draft content with an AI writer.
 
-Built with **Next.js** • **JavaScript** • **Tailwind CSS**
+Live demo: https://seokeywordminer.vercel.app
 
-🔗 **Live Demo:** https://seokeywordminer.vercel.app
+## Features
 
-![VN20260112_160520-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/23d8dc0b-4005-4435-ad9e-3c72ea8703d3)
+- Extract SEO-relevant keywords from any public URL.
+- Compare competitor pages and surface keyword gaps.
+- Auto-scroll to the generated report after extraction finishes.
+- Export reports as CSV or JSON.
+- Generate SEO-friendly draft content from a topic, target keywords, and word count.
+- Responsive interface with sticky navigation, mobile menu, legal pages, and contact form.
+- Free to use with no login required.
 
-Current main approach:  
-Enter any website URL → tool fetches the content → **AI-powered analysis** extracts important keywords, phrases and provides SEO insights.
+## Tech Stack
 
-## ✨ Main Features
+- Next.js 16
+- React 19
+- JavaScript
+- Tailwind CSS 4
+- Framer Motion
+- Lucide React icons
+- Nodemailer contact API
+- Ollama-compatible AI API integration
 
-- **Instant Keyword Extraction** — enter any URL and get high-impact keywords  
-- **AI-enhanced analysis** — uses modern language models + NLP for contextual understanding  
-- **Keyword Gap Analysis** — discover opportunities your site is missing    
-- Basic Competitor Analysis
-- Clean, minimalistic single-page interface  
-- Free to use (no login required)  
-- Fast processing for most pages
+## Getting Started
 
-### New: AI Writer
-Generate complete **SEO-optimized articles** directly in the tool!  
-Just provide:
-- Content title/topic
-- Target keywords (comma-separated)
-- Desired style (Short & Sweet / Concise & Clear / In-Depth / Comprehensive)
+```bash
+npm install
+npm run dev
+```
 
-→ One-click generation of ready-to-publish content
+Open http://localhost:3000 in your browser.
 
-## 🚀 Tech Stack
+## Available Scripts
 
-- **Framework**: Next.js
-- **Language**: JavaScript
-- **Styling**: Tailwind CSS 
-- **Deployment**: Vercel  
-- **Backend fetching**: API routes  
-- **AI part**: Ollama remote models
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-## Ollama Setup
+## Environment Variables
 
-Point the app at a remote Ollama-compatible API host that serves `gpt-oss:20b`. The app calls `/api/chat` on this host, so set `OLLAMA_HOST` to the base URL only.
+Create a `.env.local` file and configure the services you use:
 
 ```bash
 OLLAMA_HOST=https://your-remote-ollama-host.example.com
@@ -50,37 +54,40 @@ OLLAMA_MODEL=gpt-oss:20b
 OLLAMA_KEYWORD_MODEL=gpt-oss:20b
 OLLAMA_CONTENT_MODEL=gpt-oss:20b
 OLLAMA_TEMPERATURE=0.2
+
+EMAIL_USER=your-email@example.com
+EMAIL_PASS=your-email-app-password
+
+NEXT_PUBLIC_GOOGLE_ANALYTICS=
 ```
 
 `OLLAMA_API_KEY` is optional and is sent as a Bearer token when your remote provider requires authentication.
 
-## 🚀 Quick Start
+## Project Structure
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/Ahmedj04/SEO-keywords-Extractor.git
-
-# 2. Enter project directory
-cd SEO-keywords-Extractor
-
-# 3. Install dependencies
-npm install
-# or yarn install
-# or pnpm install
-# or bun install
-
-# 4. Run development server
-npm run dev
-# or yarn dev
-# or pnpm dev
-# or bun dev
+```text
+components/      Shared UI such as Header and Footer
+pages/           Next.js pages and API routes
+pages/api/       Contact and metadata API handlers
+services/        AI/content service helpers
+styles/          Global styles and Tailwind import
+utils/           Keyword, SEO, and parser utilities
 ```
-## 🤝 Contributing
-Pull requests are welcome!
-For major changes, please open an issue first to discuss what you would like to change.
 
-Fork the Project
-Create your Feature Branch (git checkout -b feature/cool-feature)
-Commit your Changes (git commit -m 'Add cool feature')
-Push to the Branch (git push origin feature/cool-feature)
-Open a Pull Request
+## Workflow
+
+1. Enter a public page URL.
+2. SEO Miner normalizes and fetches page metadata.
+3. The app extracts keywords from the current page.
+4. Competitor URLs are discovered and analyzed.
+5. Keyword gaps are calculated.
+6. The report section appears and scrolls into view automatically.
+7. Export the report or use the AI Writer to draft content.
+
+## Deployment
+
+The app is built for Vercel deployment. Add the same environment variables in your Vercel project settings before deploying.
+
+## Contributing
+
+Pull requests are welcome. For larger changes, open an issue first so the direction can be discussed.

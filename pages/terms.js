@@ -44,10 +44,10 @@ const TermsOfService = () => {
                     >
                         <div className="space-y-6 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                             <p>
-                                These Terms of Service ("Terms") govern your access to and use of SEO Keyword Miner ("the Service"). By using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, please do not use the Service.
+                                These Terms of Service ("Terms") govern your access to and use of SEO Miner ("the Service"). By using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, please do not use the Service.
                             </p>
                             <p>
-                                SEO Keyword Miner is a web-based tool designed to assist users with search engine optimization (SEO) tasks, including keyword extraction, keyword gap analysis, competitor research, and AI-generated content ideas. The Service is currently offered as a side project and is made available on an "as-is" basis without any warranties or guarantees of performance or uptime.
+                                SEO Miner is a web-based tool designed to assist users with search engine optimization (SEO) tasks, including keyword extraction, keyword gap analysis, competitor research, and AI-generated content ideas. The Service is currently offered as a side project and is made available on an "as-is" basis without any warranties or guarantees of performance or uptime.
                             </p>
                             <p>
                                 Users are expected to use the Service in good faith and for lawful purposes only. You agree not to misuse the platform in any way, including but not limited to attempting to interfere with its operation, reverse engineering any part of it, or using it to generate or distribute malicious or misleading content.
@@ -59,7 +59,7 @@ const TermsOfService = () => {
                                 The Service may change over time. Features may be added, modified, or removed without prior notice. As this is a personal side project, there is no guarantee of support, maintenance, or continued availability.
                             </p>
                             <p>
-                                Under no circumstances shall the creator of SEO Keyword Miner be liable for any damages or losses resulting from the use or inability to use the Service. You use the tool at your own risk, and any decisions or strategies based on the insights provided are your responsibility alone.
+                                Under no circumstances shall the creator of SEO Miner be liable for any damages or losses resulting from the use or inability to use the Service. You use the tool at your own risk, and any decisions or strategies based on the insights provided are your responsibility alone.
                             </p>
                             <p>
                                 These Terms may be updated occasionally. Continued use of the Service after changes are made constitutes your acceptance of the revised Terms.

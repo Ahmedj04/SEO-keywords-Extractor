@@ -44,7 +44,7 @@ export default function Privacy() {
                     >
                         <div className="space-y-6 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                             <p>
-                                SEO Keyword Miner is committed to respecting your privacy. As of now, this Service does not collect, store, or process any personal information from users.
+                                SEO Miner is committed to respecting your privacy. As of now, this Service does not collect, store, or process any personal information from users.
                             </p>
                             <p>
                                 No account creation is required to access or use the tool, and we do not ask for your name, email address, or any other identifiable information. We do not use cookies, local storage, or session storage to track user activity. The Service operates entirely without analytics scripts, trackers, or third-party integrations that would collect behavioral data.
@@ -56,7 +56,7 @@ export default function Privacy() {
                                 In the event that user data collection becomes necessary in the future—for example, to save reports or personalize features—this policy will be updated clearly and transparently, and users will be informed before any changes go into effect.
                             </p>
                             <p>
-                                By using SEO Keyword Miner, you acknowledge and agree to this data-minimal approach. If you have any concerns about privacy, you are encouraged to inspect the network traffic from your browser or review the open-source code (if applicable) to verify this privacy stance.
+                                By using SEO Miner, you acknowledge and agree to this data-minimal approach. If you have any concerns about privacy, you are encouraged to inspect the network traffic from your browser or review the open-source code (if applicable) to verify this privacy stance.
                             </p>
                         </div>
                     </div>

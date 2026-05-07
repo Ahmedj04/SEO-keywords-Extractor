@@ -12,7 +12,7 @@ export default function Footer() {
                             <Sparkles className="h-3.5 w-3.5" />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-[var(--foreground)]">SEO Keyword Miner</p>
+                            <p className="text-sm font-semibold text-[var(--foreground)]">SEO Miner</p>
                             <p className="text-xs text-[var(--text-muted)]">Free SEO research workspace</p>
                         </div>
                     </div>
@@ -32,7 +32,7 @@ export default function Footer() {
                             </Link>
                         </div>
                         <p className="text-xs text-[var(--text-muted)]">
-                            &copy; {new Date().getFullYear()} SEO Keyword Miner. All rights reserved.
+                            &copy; {new Date().getFullYear()} SEO Miner. All rights reserved.
                         </p>
                     </div>
                 </div>

@@ -51,13 +51,19 @@ export default function Header() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 ${
-                                link.featured
-                                    ? 'bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--accent)] shadow-sm'
-                                    : 'text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-2)]'
-                            }`}
+                            className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 'text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-2)] `}
                         >
-                            {link.label}
+                            <span>{link.label}</span>
+                            {link.featured && (
+                                <motion.span
+                                    initial={{ opacity: 0.6, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                                    className="bg-black ml-2 text-white text-xs px-2 py-0.5 rounded-full shadow-md"
+                                >
+                                    New ✨
+                                </motion.span>
+                            )}
                         </Link>
                     ))}
                 </div>
@@ -74,11 +80,11 @@ export default function Header() {
                     {isMobileMenuOpen && (
                         <motion.div
                             ref={mobileMenuRef}
-                            initial={{ opacity: 0, scale: 0.95, y: -8 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -8 }}
-                            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                            className="fixed right-4 top-4 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow-xl)] md:hidden"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed top-0 right-0 h-screen w-64 bg-gray-50 backdrop-blur-md border-l border-gray-300/20 shadow-2xl z-50 p-6 space-y-8"
                         >
                             <div className="mb-3 flex items-center justify-between px-2">
                                 <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
@@ -105,13 +111,19 @@ export default function Header() {
                                         key={link.href}
                                         href={link.href}
                                         onClick={closeMobileMenu}
-                                        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                            link.featured
-                                                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                                                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]'
-                                        }`}
+                                        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors`}
                                     >
-                                        {link.label}
+                                        <span>{link.label}</span>
+                                        {link.featured && (
+                                            <motion.span
+                                                initial={{ opacity: 0.6, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                                                className="bg-black ml-2 text-white text-xs px-2 py-0.5 rounded-full shadow-md"
+                                            >
+                                                New ✨
+                                            </motion.span>
+                                        )}
                                     </Link>
                                 ))}
                                 <div className="my-1 border-t border-[var(--border)]" />
